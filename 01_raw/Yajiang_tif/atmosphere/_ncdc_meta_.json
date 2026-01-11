@@ -1,0 +1,169 @@
+{
+    "_doc_type_": "metadata",
+    "id": "21691d03-bef2-4800-924e-5614e7268b87",
+    "title_cn": "多源数据融合的中国高分辨多要素气象驱动产品（ChinaMet）",
+    "title_en": "ChinaMet: A High-resolution Multi-element Meteorological Driving Dataset for China via Multi-source Data Fusion",
+    "organization": "平台服务中心",
+    "ds_abstract": "<p>&emsp;&emsp;ChinaMet 一个中国高分辨率（1km）和长时间序列（1980-2024）全要素气象驱动产品，通过融合多源遥感数据、再分析资料以及超过 2000 个气象站的观测数据研制而成。ChinaMet 包括 8个气象要素，分别为：降水量（pre）、近地面2米平均气温（tmpmean）、最高气温（tmpmax）、最低气温（tmpmin）、 10米风速（wind）、相对湿度（rhu）、地面气压（pres）和潜在蒸散发（pet）。数据的时间覆盖范围为1980-2024年，空间分辨率分别为0.1° 和 0.01° ，时间分辨率为年/月/日。每个文件的命名方式为\r\nChinaMet_%S_%V_%T.nc\"，\"%S\"代表数据空间分辨率，\"%V\"代表变量名称，\"%T\"代表时间，例如1982_01_01。 </p>",
+    "ds_source": "<p>&emsp;&emsp;气象站点观测数据来自于国家气象数据中心（CMA）；融合的遥感降水产品主要包括IMERG、SM2RAIN-ASCAT 和 CMORPH；再分析资料使用欧洲中期天气预报中心(ECWMF)最新发布的ERA5-Land产品；其它遥感产品包括AVHRR NDVI数据，MODIS的地表温度数据。</p>",
+    "ds_process_way": "<p>&emsp;&emsp;基于知识引导的机器学习方法，并结合气候场辅助空间降尺度技术研制而成。潜在蒸散发 (PET) 分为两个版本，即 petHG 和 petPM，分别采用 Hargreaves 方法和 Penman-Monteith 方法估算而得。 </p>",
+    "ds_quality": "<p>&emsp;&emsp;数据的时空分辨率及精度优于同类产品。</p>",
+    "ds_acq_start_time": "1980/01/01 00:00",
+    "ds_acq_end_time": "2024/12/31 00:00",
+    "ds_acq_lon_east": null,
+    "ds_acq_lat_south": null,
+    "ds_acq_lon_west": null,
+    "ds_acq_lat_north": null,
+    "ds_acq_place": "中国",
+    "ds_acq_alt_low": null,
+    "ds_acq_alt_high": null,
+    "ds_share_type": "在线下载",
+    "ds_total_size": 3668951849399,
+    "ds_format": "nc4",
+    "ds_space_res": "",
+    "ds_time_res": "年",
+    "ds_coordinate": "WGS84",
+    "ds_projection": "",
+    "ds_thumbnail": "21691d03-bef2-4800-924e-5614e7268b87.jpg",
+    "ds_topic_tags": [
+        "相对湿度",
+        "地面气压",
+        "蒸发量",
+        "多源数据融合"
+    ],
+    "ds_subject_tags": [
+        "大气科学"
+    ],
+    "ds_time_tags": [
+        1980,
+        1981,
+        1982,
+        1983,
+        1984,
+        1985,
+        1986,
+        1987,
+        1988,
+        1989,
+        1990,
+        1991,
+        1992,
+        1993,
+        1994,
+        1995,
+        1996,
+        1997,
+        1998,
+        1999,
+        2000,
+        2001,
+        2002,
+        2003,
+        2004,
+        2005,
+        2006,
+        2007,
+        2008,
+        2009,
+        2010,
+        2011,
+        2012,
+        2013,
+        2014,
+        2015,
+        2016,
+        2017,
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024
+    ],
+    "ds_locus_tags": [
+        "中国"
+    ],
+    "created": "2025/01/03 11:35",
+    "updated": "2025/09/02 01:20",
+    "last_updated": "2025/09/02 09:20",
+    "ds_category": "气象",
+    "publish_status": 3,
+    "contributors": [
+        {
+            "true_name": "张凌",
+            "mailbox": "zhanglingky@lzb.ac.cn",
+            "work_for": "中国科学院西北生态环境资源研究院"
+        },
+        {
+            "true_name": "胡英屹",
+            "mailbox": "",
+            "work_for": "中国科学院西北生态环境资源研究院"
+        },
+        {
+            "true_name": "赵彦博",
+            "mailbox": "eanbo@lab.ac.cn",
+            "work_for": "中国科学院西北生态环境资源研究院"
+        },
+        {
+            "true_name": "车涛",
+            "mailbox": "chetao@lzb.ac.cn",
+            "work_for": "中国科学院西北生态环境资源研究院"
+        }
+    ],
+    "ds_meta_authors": [
+        {
+            "true_name": "张凌",
+            "mailbox": "zhanglingky@lzb.ac.cn",
+            "work_for": "中国科学院西北生态环境资源研究院"
+        }
+    ],
+    "ds_managers": [
+        {
+            "true_name": "张凌",
+            "mailbox": "zhanglingky@lzb.ac.cn",
+            "work_for": "中国科学院西北生态环境资源研究院"
+        }
+    ],
+    "publications": [
+        {
+            "title": "Merging multiple satellite-based precipitation products and gauge observations using a novel double machine learning approach",
+            "magazine": "Journal of Hydrology"
+        },
+        {
+            "title": "Added value of merging techniques in precipitation estimates relative to gauge-interpolation algorithms of varying complexity",
+            "magazine": "Journal of Hydrology"
+        }
+    ],
+    "paper_data_status": 0,
+    "ds_projects": [
+        {
+            "title": "多源数据支持下的中国灌溉信息反演与重建研究",
+            "title_en": null,
+            "code": "42271286",
+            "type": "国家自然科学基金"
+        },
+        {
+            "title": "中科院青促会项目",
+            "title_en": "2023454",
+            "code": "2023454",
+            "type": "其他"
+        },
+        {
+            "title": "甘肃省科技计划",
+            "title_en": "甘肃省科技计划",
+            "code": "23ZDKA0004",
+            "type": "其他"
+        }
+    ],
+    "publish_time": "2025/01/06 16:53",
+    "ds_ref_instruction": "",
+    "papers_ref": [
+        "Zhang Ling, Li Xin, Zheng Donghai, Zhang Kun, Ma Qimin, Zhao Yanbo, Ge Yingchun. Merging multiple satellite-based precipitation products and gauge observations using a novel double machine learning approach[J]. Journal of Hydrology, 2021, 594:125969. ",
+        "Hu Yingyi, Zhang Ling. Added value of merging techniques in precipitation estimates relative to gauge-interpolation algorithms of varying complexity[J]. Journal of Hydrology, 2024, 645:132214. \n            DOI: https://doi.org/10.1016/j.jhydrol.2024.132214."
+    ],
+    "cites": {
+        "cstr": "张凌,胡英屹,赵彦博,车涛. 多源数据融合的中国高分辨多要素气象驱动产品（ChinaMet）. 国家冰川冻土沙漠科学数据中心(http://www.ncdc.ac.cn), 2025. https://cstr.cn/CSTR:11738.11.NCDC.NIEER.DB6722.2025.",
+        "doi": "张凌,胡英屹,赵彦博,车涛. 多源数据融合的中国高分辨多要素气象驱动产品（ChinaMet）. 国家冰川冻土沙漠科学数据中心(http://www.ncdc.ac.cn), 2025. https://www.doi.org/10.12072/ncdc.nieer.db6722.2025."
+    }
+}

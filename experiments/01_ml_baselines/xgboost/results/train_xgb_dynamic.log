@@ -1,0 +1,26 @@
+2026-01-10 23:23:38,957 [INFO] Initialized Experiment: XGBoost_Baseline_Static_Bias_Check | Mode: dynamic
+2026-01-10 23:23:38,958 [INFO] >>> Loading Data...
+2026-01-10 23:23:38,958 [INFO]     Reading Features: su_features_dynamic.parquet
+2026-01-10 23:23:38,996 [INFO]     Reading Dataset:  tabular_dataset_dynamic.parquet
+2026-01-10 23:23:39,011 [INFO]     Merged DataFrame Shape: (8525, 135)
+2026-01-10 23:23:39,011 [INFO]     Feature Selection:
+2026-01-10 23:23:39,012 [INFO]       Static  (25): ['Aspect_max', 'Aspect_mean', 'Aspect_min'] ...
+2026-01-10 23:23:39,012 [INFO]       Dynamic (12): ['dMNDWI_max', 'dMNDWI_mean', 'dMNDWI_min'] ...
+2026-01-10 23:23:39,012 [INFO]       Total Input Features: 37
+2026-01-10 23:23:39,013 [INFO] >>> Preparing Training Sets...
+2026-01-10 23:23:39,013 [INFO]     Using balanced 'train_sample_mask' for training.
+2026-01-10 23:23:39,018 [INFO]     Train Samples: 324 | Pos Rate: 0.5000
+2026-01-10 23:23:39,019 [INFO]     Test  Samples: 4135  | Pos Rate: 0.0399
+2026-01-10 23:23:39,019 [INFO]     Auto-calculated scale_pos_weight: 1.00
+2026-01-10 23:23:39,019 [INFO] >>> Starting Training...
+2026-01-10 23:23:39,489 [INFO]     Training completed in 0.47 seconds.
+2026-01-10 23:23:39,490 [INFO] >>> Evaluating Model...
+2026-01-10 23:23:39,538 [INFO]     Predictions saved to: experiments\01_ml_baselines\xgboost\results\xgb_predictions_dynamic.csv
+2026-01-10 23:23:39,543 [INFO]     [TEST METRICS]
+2026-01-10 23:23:39,543 [INFO]       ROC-AUC : 0.7478
+2026-01-10 23:23:39,543 [INFO]       PR-AUC  : 0.1097
+2026-01-10 23:23:39,543 [INFO] >>> Analyzing Static Bias...
+2026-01-10 23:23:39,575 [INFO]     Static Importance  : 78.75%
+2026-01-10 23:23:39,576 [INFO]     Dynamic Importance : 21.25%
+2026-01-10 23:23:39,576 [INFO]     Bias Report saved to: experiments\01_ml_baselines\xgboost\results\bias_report_dynamic.txt
+2026-01-10 23:23:39,585 [INFO]     Model saved to: experiments\01_ml_baselines\xgboost\models\xgb_model_dynamic.json

@@ -1,0 +1,16 @@
+2026-01-11 10:25:11,858 [INFO] Starting GCN Training on cuda | Mode: static
+2026-01-11 10:25:11,859 [INFO] Loading features from tabular_dataset_static.parquet
+2026-01-11 10:25:11,902 [INFO] Loading topology from edges_static.parquet
+2026-01-11 10:25:11,907 [INFO] Selected 51 features (Static + Dynamic).
+2026-01-11 10:25:11,908 [INFO] Applying balanced sampling mask for training.
+2026-01-11 10:25:13,379 [INFO] Data Loaded Successfully. Nodes: 8489, Edges: 47552
+2026-01-11 10:25:19,625 [INFO] Epoch 000: Loss=0.9444 | Test AUC=0.7076 AUPRC=0.0860
+2026-01-11 10:25:19,810 [INFO] Epoch 010: Loss=0.3407 | Test AUC=0.8211 AUPRC=0.1288
+2026-01-11 10:25:19,937 [INFO] Epoch 020: Loss=0.2565 | Test AUC=0.8167 AUPRC=0.1451
+2026-01-11 10:25:19,976 [INFO] Early stopping triggered.
+2026-01-11 10:25:19,976 [INFO] Training finished in 2.83s
+2026-01-11 10:25:19,976 [INFO] Loading best model from E:\Document\paper_library\5th_paper_InSAR\datasets\experiments\02_dl_gcn\results\gcn_best_model_static.pth
+2026-01-11 10:25:20,025 [INFO] Best Test Performance: AUC=0.8327, AUPRC=0.1252, Acc=0.6114, F1=0.1654
+2026-01-11 10:25:20,028 [INFO] Exporting results (CSV + GeoTIFF)...
+2026-01-11 10:25:20,055 [INFO] Predictions saved to E:\Document\paper_library\5th_paper_InSAR\datasets\experiments\02_dl_gcn\results\gcn_predictions_static.csv
+2026-01-11 10:39:31,738 [INFO] LSM Map saved to E:\Document\paper_library\5th_paper_InSAR\datasets\experiments\02_dl_gcn\results\LSM_GCN_Prob_static.tif (Mapped 8471 SUs)

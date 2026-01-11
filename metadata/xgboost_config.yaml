@@ -1,0 +1,82 @@
+# ==============================================================================
+# XGBoost Experiment Configuration (v1.0)
+# ==============================================================================
+# Description:
+#   Configuration for the baseline XGBoost model to establish "Static Bias".
+#   This file defines input paths, feature selection strategies, and model parameters.
+#   It is intentionally separated from the global dataset_config.yaml to ensure
+#   experiment isolation and reproducibility.
+# ==============================================================================
+
+experiment:
+  name: "XGBoost_Baseline_Static_Bias_Check"
+  version: "1.0"
+  random_seed: 42
+  output_dir: "experiments/01_ml_baselines/xgboost"
+
+paths:
+  # Input Parquet files
+  input_features: "04_tabular_SU/su_features.parquet"
+  input_dataset: "04_tabular_SU/tabular_dataset.parquet"  # Contains Split & Labels
+
+  # Output filenames (will be saved in output_dir)
+  output_model: "xgb_model.json"
+  output_predictions: "xgb_predictions.csv"
+  output_importance: "feature_importance_detailed.csv"
+  output_bias_report: "static_bias_report.txt"
+
+# ------------------------------------------------------------------------------
+# Feature Selection Logic
+# ------------------------------------------------------------------------------
+# The script will select columns starting with these prefixes (e.g., "Slope" -> "Slope_mean", "Slope_std")
+features:
+  # Group 1: Static Environmental Factors (H0: Model over-relies on these)
+  static_prefixes:
+    - "Slope"
+    - "Aspect"
+    - "Lithology"
+    - "Dis2River"
+    - "Dis2Road"
+    - "Dis2Fault"
+    - "Precipitation"
+
+  # Group 2: Dynamic Disturbance Factors (H1: Model ignores these without Causal Intervention)
+  dynamic_prefixes:
+    - "dNDVI"
+    - "dNBR"
+    - "dMNDWI"
+
+  # Group 3: Excluded Factors
+  # - InSAR_Vel: Used only for verification or Causal Gating (Constraint), not as a raw input feature to avoid leakage.
+  exclude_prefixes:
+    - "InSAR_Vel"
+
+# ------------------------------------------------------------------------------
+# Model Hyperparameters
+# ------------------------------------------------------------------------------
+model_params:
+  # Booster Params
+  booster: "gbtree"
+  objective: "binary:logistic"
+  eval_metric: "auc"
+  n_estimators: 1000
+  
+  # Tree Structure
+  max_depth: 6
+  learning_rate: 0.05
+  gamma: 0.1             # Min loss reduction
+  min_child_weight: 1
+  
+  # Regularization
+  subsample: 0.8
+  colsample_bytree: 0.8
+  reg_alpha: 0.01        # L1
+  reg_lambda: 1.0        # L2
+
+  # Imbalance Handling
+  # Auto-calculation logic is implemented in the script. 
+  # If set to specific value, it overrides auto-calculation.
+  scale_pos_weight: null 
+  
+  # Early Stopping
+  early_stopping_rounds: 50

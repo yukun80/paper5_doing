@@ -1,0 +1,9 @@
+2026-01-11 10:24:56,679 [INFO] >>> Starting Full Inference (static)...
+2026-01-11 10:24:56,679 [INFO]     Reading Features: su_features_static.parquet
+2026-01-11 10:24:56,725 [INFO]     Resolved 25 features from config.
+2026-01-11 10:24:56,727 [INFO]     Loading Model: xgb_model_static.json
+2026-01-11 10:24:56,833 [INFO]     Predicting for 8483 Slope Units...
+2026-01-11 10:24:56,866 [INFO]     Predictions saved to: experiments\01_ml_baselines\xgboost\results\xgb_full_inference_static.csv
+2026-01-11 10:24:56,866 [INFO] >>> Generating Map: LSM_XGBoost_Prob_Static.tif
+2026-01-11 10:25:02,440 [INFO]     [SUCCESS] Map saved to: experiments\01_ml_baselines\xgboost\results\LSM_XGBoost_Prob_Static.tif
+2026-01-11 10:25:02,530 [INFO] >>> Inference Pipeline (static) Completed in 5.86s

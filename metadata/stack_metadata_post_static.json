@@ -1,0 +1,107 @@
+[
+  {
+    "band_index": 1,
+    "name": "Slope",
+    "filename": "Yajiang_slope_clip_10m_nodata.tif",
+    "type": "continuous",
+    "group": "terrain"
+  },
+  {
+    "band_index": 2,
+    "name": "Lithology",
+    "filename": "Yajiang_lithology_clip_10m_nodata.tif",
+    "type": "categorical",
+    "group": "geology"
+  },
+  {
+    "band_index": 3,
+    "name": "Elevation",
+    "filename": "Yajiang_elevation_clip_10m_nodata.tif",
+    "type": "continuous",
+    "group": "terrain"
+  },
+  {
+    "band_index": 4,
+    "name": "Curvature",
+    "filename": "Yajiang_Curvature_clip_10m_nodata.tif",
+    "type": "continuous",
+    "group": "terrain"
+  },
+  {
+    "band_index": 5,
+    "name": "TWI",
+    "filename": "Yajiang_TWI_clip_10m_nodata.tif",
+    "type": "continuous",
+    "group": "hydrology"
+  },
+  {
+    "band_index": 6,
+    "name": "Aspect",
+    "filename": "Yajiang_aspect_clip_10m_nodata.tif",
+    "type": "continuous",
+    "group": "terrain"
+  },
+  {
+    "band_index": 7,
+    "name": "Soil",
+    "filename": "Yajiang_Soil_clip_nodata.tif",
+    "type": "categorical",
+    "group": "geology"
+  },
+  {
+    "band_index": 8,
+    "name": "LULC",
+    "filename": "LULC_Class_all_2023-2025_10m_nodata.tif",
+    "type": "categorical",
+    "group": "landcover"
+  },
+  {
+    "band_index": 9,
+    "name": "Dis2River",
+    "filename": "dis2river_clip_10m_nodata.tif",
+    "type": "continuous",
+    "group": "hydrology"
+  },
+  {
+    "band_index": 10,
+    "name": "Dis2Road",
+    "filename": "dis2road_clip_10m_nodata.tif",
+    "type": "continuous",
+    "group": "anthropogenic"
+  },
+  {
+    "band_index": 11,
+    "name": "Dis2Fault",
+    "filename": "dis2fault_clip_10m_nodata.tif",
+    "type": "continuous",
+    "group": "geology"
+  },
+  {
+    "band_index": 12,
+    "name": "Precipitation",
+    "filename": "Mean_Precip_2000_2024_10m_clip_10m_nodata.tif",
+    "type": "continuous",
+    "group": "climate"
+  },
+  {
+    "band_index": 13,
+    "name": "NBR_Pre",
+    "filename": "S2_NBR_2025_Pre_10m_nodata.tif",
+    "type": "continuous",
+    "group": "vegetation"
+  },
+  {
+    "band_index": 14,
+    "name": "NDVI_Pre",
+    "filename": "S2_NDVI_20220401_20220930_10m_nodata.tif",
+    "type": "continuous",
+    "group": "vegetation"
+  },
+  {
+    "band_index": 15,
+    "name": "NDWI_Pre",
+    "filename": "S2_NDWI_20230415_20230930_10m_nodata.tif",
+    "type": "continuous",
+    "group": "water"
+  }
+]

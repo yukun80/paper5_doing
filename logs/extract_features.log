@@ -1,0 +1,23 @@
+2026-01-11 09:58:54,864 [INFO] >>> Starting Program 2: SU Feature Extraction
+2026-01-11 09:58:54,866 [INFO] Mode: static | Config: metadata\dataset_config_static.yaml
+2026-01-11 09:58:54,873 [INFO] Loading SU Grid: su_a50000_c03_geo.tif
+2026-01-11 09:58:58,077 [INFO] Found 8483 unique Slope Units.
+2026-01-11 09:58:58,077 [INFO] --- Starting Extraction from Post_stack_static.tif ---
+2026-01-11 09:58:58,080 [INFO] Processing Band 1: Slope (continuous)
+2026-01-11 10:00:17,889 [INFO] Processing Band 2: Lithology (categorical)
+2026-01-11 10:00:49,676 [INFO] Processing Band 3: Elevation (continuous)
+2026-01-11 10:02:21,062 [INFO] Processing Band 4: Curvature (continuous)
+2026-01-11 10:04:36,934 [INFO] Processing Band 5: TWI (continuous)
+2026-01-11 10:06:52,096 [INFO] Processing Band 6: Aspect (continuous)
+2026-01-11 10:09:00,734 [INFO] Processing Band 7: Soil (categorical)
+2026-01-11 10:09:57,937 [INFO] Processing Band 8: LULC (categorical)
+2026-01-11 10:10:57,094 [INFO] Processing Band 9: Dis2River (continuous)
+2026-01-11 10:12:56,373 [INFO] Processing Band 10: Dis2Road (continuous)
+2026-01-11 10:14:57,529 [INFO] Processing Band 11: Dis2Fault (continuous)
+2026-01-11 10:16:47,862 [INFO] Processing Band 12: Precipitation (continuous)
+2026-01-11 10:18:45,450 [INFO] Processing Band 13: NBR_Pre (continuous)
+2026-01-11 10:20:51,487 [INFO] Processing Band 14: NDVI_Pre (continuous)
+2026-01-11 10:22:40,475 [INFO] Processing Band 15: NDWI_Pre (continuous)
+2026-01-11 10:23:56,667 [INFO] --- Saving Results ---
+2026-01-11 10:23:56,785 [INFO] Saved 8483 SU features to: E:\Document\paper_library\5th_paper_InSAR\datasets\04_tabular_SU\su_features_static.parquet
+2026-01-11 10:23:56,786 [INFO] Total Time: 1501.92 seconds

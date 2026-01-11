@@ -1,0 +1,468 @@
+
+___________________________________________________________
+
+  /##      /## /##             /##     /#######
+ | ###    /###|__/            | ##    | ##__  ##
+ | ####  /#### /## /#######  /######  | ##  \ ## /##   /##
+ | ## ##/## ##| ##| ##__  ##|_  ##_/  | #######/| ##  | ##
+ | ##  ###| ##| ##| ##  \ ##  | ##    | ##____/ | ##  | ##
+ | ##\  # | ##| ##| ##  | ##  | ## /##| ##      | ##  | ##
+ | ## \/  | ##| ##| ##  | ##  |  ####/| ##      |  #######
+ |__/     |__/|__/|__/  |__/   \___/  |__/       \____  ##
+                                                 /##  | ##
+                                                |  ######/
+   Miami InSAR Time-series software in Python    \______/
+          MintPy 1.6.2.post16, 2025-11-22
+___________________________________________________________
+
+--RUN-at-2025-12-12 10:46:11.487992--
+Current directory: /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3
+Run routine processing with smallbaselineApp.py on steps: ['correct_troposphere', 'deramp', 'correct_topography', 'residual_RMS', 'reference_date', 'velocity', 'geocode', 'google_earth', 'hdfeos5']
+Remaining steps: ['deramp', 'correct_topography', 'residual_RMS', 'reference_date', 'velocity', 'geocode', 'google_earth', 'hdfeos5']
+--------------------------------------------------
+Project name: RidgecrestSenDT71
+Go to work directory: /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3
+read custom template file: /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/RidgecrestSenDT71.txt
+update default template based on input custom template
+No new option value found, skip updating /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/smallbaselineApp.cfg
+read default template file: /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/smallbaselineApp.cfg
+
+
+******************** step - correct_troposphere ********************
+Input data seems to be geocoded. Lookup file not needed.
+Atmospheric correction using Weather Re-analysis dataset (PyAPS, Jolivet et al., 2011)
+Weather Re-analysis dataset: ERA5
+--------------------------------------------
+Use existed tropospheric delay file: ./inputs/ERA5.h5
+
+diff.py /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/timeseries.h5 ./inputs/ERA5.h5 -o /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/timeseries_ERA5.h5 --force
+/home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/timeseries.h5 - ['./inputs/ERA5.h5'] --> /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/timeseries_ERA5.h5
+the 1st input file is: timeseries
+--------------------------------------------------
+grab metadata from ref_file: /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/timeseries.h5
+grab dataset structure from ref_file: /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/timeseries.h5
+create HDF5 file: /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/timeseries_ERA5.h5 with w mode
+create dataset  : bperp      of float32                   in size of (132,)               with compression = None
+create dataset  : date       of |S8                       in size of (132,)               with compression = None
+create dataset  : timeseries of float32                   in size of (132, 4239, 2693)    with compression = None
+close  HDF5 file: /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/timeseries_ERA5.h5
+split along y dimension (4239) into 8 boxes
+    with each box up to 530 in y dimension
+
+------- processing patch 1 out of 8 --------------
+box: [0, 0, 2693, 530]
+read from file: ./inputs/ERA5.h5
+* referencing data from ERA5.h5 to y/x: 3033/276
+* referencing data from ERA5.h5 to date: 20200109
+read from file: /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/timeseries.h5
+--------------------------------------------------
+open  HDF5 file /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/timeseries_ERA5.h5 in a mode
+writing dataset /timeseries                block: [0, 132, 0, 530, 0, 2693]
+close HDF5 file /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/timeseries_ERA5.h5.
+
+------- processing patch 2 out of 8 --------------
+box: [0, 530, 2693, 1060]
+read from file: ./inputs/ERA5.h5
+* referencing data from ERA5.h5 to y/x: 3033/276
+* referencing data from ERA5.h5 to date: 20200109
+read from file: /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/timeseries.h5
+--------------------------------------------------
+open  HDF5 file /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/timeseries_ERA5.h5 in a mode
+writing dataset /timeseries                block: [0, 132, 530, 1060, 0, 2693]
+close HDF5 file /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/timeseries_ERA5.h5.
+
+------- processing patch 3 out of 8 --------------
+box: [0, 1060, 2693, 1590]
+read from file: ./inputs/ERA5.h5
+* referencing data from ERA5.h5 to y/x: 3033/276
+* referencing data from ERA5.h5 to date: 20200109
+read from file: /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/timeseries.h5
+--------------------------------------------------
+open  HDF5 file /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/timeseries_ERA5.h5 in a mode
+writing dataset /timeseries                block: [0, 132, 1060, 1590, 0, 2693]
+close HDF5 file /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/timeseries_ERA5.h5.
+
+------- processing patch 4 out of 8 --------------
+box: [0, 1590, 2693, 2120]
+read from file: ./inputs/ERA5.h5
+* referencing data from ERA5.h5 to y/x: 3033/276
+* referencing data from ERA5.h5 to date: 20200109
+read from file: /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/timeseries.h5
+--------------------------------------------------
+open  HDF5 file /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/timeseries_ERA5.h5 in a mode
+writing dataset /timeseries                block: [0, 132, 1590, 2120, 0, 2693]
+close HDF5 file /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/timeseries_ERA5.h5.
+
+------- processing patch 5 out of 8 --------------
+box: [0, 2120, 2693, 2650]
+read from file: ./inputs/ERA5.h5
+* referencing data from ERA5.h5 to y/x: 3033/276
+* referencing data from ERA5.h5 to date: 20200109
+read from file: /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/timeseries.h5
+--------------------------------------------------
+open  HDF5 file /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/timeseries_ERA5.h5 in a mode
+writing dataset /timeseries                block: [0, 132, 2120, 2650, 0, 2693]
+close HDF5 file /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/timeseries_ERA5.h5.
+
+------- processing patch 6 out of 8 --------------
+box: [0, 2650, 2693, 3180]
+read from file: ./inputs/ERA5.h5
+* referencing data from ERA5.h5 to y/x: 3033/276
+* referencing data from ERA5.h5 to date: 20200109
+read from file: /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/timeseries.h5
+--------------------------------------------------
+open  HDF5 file /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/timeseries_ERA5.h5 in a mode
+writing dataset /timeseries                block: [0, 132, 2650, 3180, 0, 2693]
+close HDF5 file /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/timeseries_ERA5.h5.
+
+------- processing patch 7 out of 8 --------------
+box: [0, 3180, 2693, 3710]
+read from file: ./inputs/ERA5.h5
+* referencing data from ERA5.h5 to y/x: 3033/276
+* referencing data from ERA5.h5 to date: 20200109
+read from file: /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/timeseries.h5
+--------------------------------------------------
+open  HDF5 file /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/timeseries_ERA5.h5 in a mode
+writing dataset /timeseries                block: [0, 132, 3180, 3710, 0, 2693]
+close HDF5 file /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/timeseries_ERA5.h5.
+
+------- processing patch 8 out of 8 --------------
+box: [0, 3710, 2693, 4239]
+read from file: ./inputs/ERA5.h5
+* referencing data from ERA5.h5 to y/x: 3033/276
+* referencing data from ERA5.h5 to date: 20200109
+read from file: /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/timeseries.h5
+--------------------------------------------------
+open  HDF5 file /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/timeseries_ERA5.h5 in a mode
+writing dataset /timeseries                block: [0, 132, 3710, 4239, 0, 2693]
+close HDF5 file /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/timeseries_ERA5.h5.
+time used: 02 mins 53.5 secs
+
+
+******************** step - deramp ********************
+Remove for each acquisition a phase ramp: quadratic
+
+remove_ramp.py /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/timeseries_ERA5.h5 -s quadratic -m maskTempCoh.h5 -o /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/timeseries_ERA5_ramp.h5 --update
+--------------------------------------------------
+update mode: ON
+1) output file /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/timeseries_ERA5_ramp.h5 NOT found.
+run or skip: run.
+remove quadratic ramp from file: /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/timeseries_ERA5.h5
+read mask file: maskTempCoh.h5
+--------------------------------------------------
+grab metadata from ref_file: /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/timeseries_ERA5.h5
+grab dataset structure from ref_file: /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/timeseries_ERA5.h5
+create HDF5 file: /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/timeseries_ERA5_ramp.h5 with w mode
+create dataset  : bperp      of float32                   in size of (132,)               with compression = None
+create dataset  : date       of |S8                       in size of (132,)               with compression = None
+create dataset  : timeseries of float32                   in size of (132, 4239, 2693)    with compression = None
+close  HDF5 file: /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/timeseries_ERA5_ramp.h5
+estimating phase ramp one date at a time ...
+[>                                                 ][>                        2%                       ] 2/132    1s /    91s[>                        2%                       ] 3/132    2s /   125s[=>                       3%                       ] 4/132    3s /   110s[=>                       4%                       ] 5/132    4s /    99s[=>                       5%                       ] 6/132    5s /    98s[=>                       5%                       ] 7/132    5s /   112s[==>                      6%                       ] 8/132    6s /   103s[===>                     7%                       ] 9/132    7s /    98s[===>                     8%                       ] 10/132    8s /    93s[===>                     8%                       ] 11/132   10s /   115s[===>                     9%                       ] 12/132   10s /   108s[====>                   10%                       ] 13/132   11s /   105s[=====>                  11%                       ] 14/132   12s /   100s[=====>                  11%                       ] 15/132   13s /   106s[=====>                  12%                       ] 16/132   29s /   212s[=====>                  13%                       ] 17/132   29s /   199s[======>                 14%                       ] 18/132   30s /   186s[======>                 14%                       ] 19/132   31s /   191s[=======>                15%                       ] 20/132   31s /   180s[=======>                16%                       ] 21/132   32s /   171s[=======>                17%                       ] 22/132   33s /   163s[=======>                17%                       ] 23/132   34s /   166s[========>               18%                       ] 24/132   34s /   159s[=========>              19%                       ] 25/132   35s /   151s[=========>              20%                       ] 26/132   36s /   146s[=========>              20%                       ] 27/132   37s /   149s[=========>              21%                       ] 28/132   38s /   143s[==========>             22%                       ] 29/132   38s /   137s[===========>            23%                       ] 30/132   39s /   132s[===========>            23%                       ] 31/132   40s /   135s[===========>            24%                       ] 32/132   41s /   130s[===========>            25%                       ] 33/132   41s /   125s[============>           26%                       ] 34/132   42s /   120s[=============>          27%                       ] 35/132   43s /   116s[=============>          27%                       ] 36/132   44s /   119s[=============>          28%                       ] 37/132   44s /   115s[=============>          29%                       ] 38/132   45s /   111s[==============>         30%                       ] 39/132   46s /   107s[==============>         30%                       ] 40/132   47s /   109s[===============>        31%                       ] 41/132   48s /   107s[===============>        32%                       ] 42/132   48s /   103s[===============>        33%                       ] 43/132   49s /   100s[===============>        33%                       ] 44/132   50s /   102s[================>       34%                       ] 45/132   50s /    98s[=================>      35%                       ] 46/132   51s /    96s[=================>      36%                       ] 47/132   52s /    93s[=================>      36%                       ] 48/132   53s /    94s[=================>      37%                       ] 49/132   53s /    91s[==================>     38%                       ] 50/132   54s /    88s[===================>    39%                       ] 51/132   55s /    86s[===================>    39%                       ] 52/132   56s /    87s[===================>    40%                       ] 53/132   56s /    85s[===================>    41%                       ] 54/132   57s /    82s[====================>   42%                       ] 55/132   58s /    80s[====================>   42%                       ] 56/132   59s /    82s[=====================>  43%                       ] 57/132   60s /    79s[=====================>  44%                       ] 58/132   60s /    77s[=====================>  45%                       ] 59/132   61s /    75s[=====================>  45%                       ] 60/132   62s /    75s[======================> 46%                       ] 61/132   63s /    74s[======================= 47%                       ] 62/132   63s /    71s[======================= 48%                       ] 63/132   64s /    70s[======================= 48%                       ] 64/132   65s /    71s[======================= 49%                       ] 65/132   66s /    69s[======================= 50%                       ] 66/132   82s /    82s[======================= 51%                       ] 67/132   83s /    80s[======================= 52%                       ] 68/132   84s /    78s[======================= 52%                       ] 69/132   85s /    78s[======================= 53%                       ] 70/132   86s /    76s[======================= 54%                       ] 71/132   86s /    74s[======================= 55%                       ] 72/132   87s /    71s[======================= 55%                       ] 73/132   88s /    72s[======================= 56%                       ] 74/132   89s /    70s[======================= 57%                       ] 75/132   89s /    67s[======================= 58% >                     ] 76/132   93s /    67s[======================= 58% >                     ] 77/132   93s /    67s[======================= 59% =>                    ] 78/132   94s /    65s[======================= 60% =>                    ] 79/132   95s /    63s[======================= 61% =>                    ] 80/132   96s /    61s[======================= 61% =>                    ] 81/132   98s /    63s[======================= 62% ==>                   ] 82/132   99s /    61s[======================= 63% ===>                  ] 83/132  100s /    58s[======================= 64% ===>                  ] 84/132  100s /    56s[======================= 64% ===>                  ] 85/132  101s /    57s[======================= 65% ===>                  ] 86/132  103s /    55s[======================= 66% ====>                 ] 87/132  103s /    53s[======================= 67% =====>                ] 88/132  104s /    51s[======================= 67% =====>                ] 89/132  105s /    51s[======================= 68% =====>                ] 90/132  105s /    49s[======================= 69% =====>                ] 91/132  106s /    47s[======================= 70% ======>               ] 92/132  107s /    46s[======================= 70% ======>               ] 93/132  108s /    46s[======================= 71% =======>              ] 94/132  108s /    44s[======================= 72% =======>              ] 95/132  109s /    42s[======================= 73% =======>              ] 96/132  110s /    40s[======================= 73% =======>              ] 97/132  111s /    41s[======================= 74% ========>             ] 98/132  112s /    39s[======================= 75% =========>            ] 99/132  112s /    37s[======================= 76% =========>            ] 100/132  113s /    35s[======================= 77% =========>            ] 101/132  114s /    34s[======================= 77% =========>            ] 102/132  115s /    34s[======================= 78% ==========>           ] 103/132  115s /    32s[======================= 79% ===========>          ] 104/132  116s /    31s[======================= 80% ===========>          ] 105/132  117s /    29s[======================= 80% ===========>          ] 106/132  118s /    29s[======================= 81% ===========>          ] 107/132  119s /    27s[======================= 82% ============>         ] 108/132  119s /    26s[======================= 83% =============>        ] 109/132  120s /    24s[======================= 83% =============>        ] 110/132  121s /    24s[======================= 84% =============>        ] 111/132  122s /    23s[======================= 85% =============>        ] 112/132  123s /    21s[======================= 86% ==============>       ] 113/132  123s /    20s[======================= 86% ==============>       ] 114/132  124s /    20s[======================= 87% ===============>      ] 115/132  125s /    18s[======================= 88% ===============>      ] 116/132  126s /    17s[======================= 89% ===============>      ] 117/132  126s /    15s[======================= 89% ===============>      ] 118/132  127s /    15s[======================= 90% ================>     ] 119/132  128s /    14s[======================= 91% =================>    ] 120/132  129s /    12s[======================= 92% =================>    ] 121/132  129s /    11s[======================= 92% =================>    ] 122/132  130s /    11s[======================= 93% =================>    ] 123/132  131s /     9s[======================= 94% ==================>   ] 124/132  132s /     8s[======================= 95% ===================>  ] 125/132  132s /     6s[======================= 95% ===================>  ] 126/132  133s /     7s[======================= 96% ===================>  ] 127/132  134s /     5s[======================= 97% ===================>  ] 128/132  135s /     4s[======================= 98% ====================> ] 129/132  137s /     2s[======================= 98% ====================> ] 130/132  137s /     2s[==================================================] 131/132[==================================================] 132/132 
+finished writing to file: /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/timeseries_ERA5_ramp.h5
+add/update the following metadata to file:
+add/update mintpy.deramp = quadratic
+add/update mintpy.deramp.maskFile = maskTempCoh.h5
+time used: 02 mins 31.9 secs.
+
+
+******************** step - correct_topography ********************
+Input data seems to be geocoded. Lookup file not needed.
+
+dem_error.py /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/timeseries_ERA5_ramp.h5 -t /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/smallbaselineApp.cfg -o /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/timeseries_ERA5_ramp_demErr.h5 --update
+read options from template file: smallbaselineApp.cfg
+--------------------------------------------------
+update mode: ON
+1) output file /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/timeseries_ERA5_ramp_demErr.h5 NOT found.
+run or skip: run.
+save the original settings of ['OMP_NUM_THREADS', 'OPENBLAS_NUM_THREADS', 'MKL_NUM_THREADS', 'NUMEXPR_NUM_THREADS', 'VECLIB_MAXIMUM_THREADS']
+set OMP_NUM_THREADS = 1
+set OPENBLAS_NUM_THREADS = 1
+set MKL_NUM_THREADS = 1
+set NUMEXPR_NUM_THREADS = 1
+set VECLIB_MAXIMUM_THREADS = 1
+open timeseries file: timeseries_ERA5_ramp.h5
+exclude the following dates for DEM error estimation: (10)
+['20250717', '20250723', '20250804', '20250816', '20250921', '20251003', '20251015', '20251027', '20251108', '20251120']
+--------------------------------------------------------------------------------
+correct topographic phase residual (DEM error) (Fattahi & Amelung, 2013, IEEE-TGRS)
+ordinal least squares (OLS) inversion with L2-norm minimization on: phase velocity
+temporal deformation model: polynomial order = 2
+--------------------------------------------------------------------------------
+add/update the following configuration metadata to file:
+['polyOrder', 'phaseVelocity', 'stepDate', 'excludeDate']
+--------------------------------------------------
+create HDF5 file: demErr.h5 with w mode
+create dataset  : dem of <class 'numpy.float32'>   in size of (4239, 2693)         with compression = None
+close  HDF5 file: demErr.h5
+--------------------------------------------------
+grab dataset structure from ref_file: /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/timeseries_ERA5_ramp.h5
+create HDF5 file: /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/timeseries_ERA5_ramp_demErr.h5 with w mode
+create dataset  : bperp      of float32                   in size of (132,)               with compression = None
+create dataset  : date       of |S8                       in size of (132,)               with compression = None
+create dataset  : timeseries of float32                   in size of (132, 4239, 2693)    with compression = None
+close  HDF5 file: /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/timeseries_ERA5_ramp_demErr.h5
+--------------------------------------------------
+grab dataset structure from ref_file: /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/timeseries_ERA5_ramp.h5
+create HDF5 file: /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/timeseriesResidual.h5 with w mode
+create dataset  : bperp      of float32                   in size of (132,)               with compression = None
+create dataset  : date       of |S8                       in size of (132,)               with compression = None
+create dataset  : timeseries of float32                   in size of (132, 4239, 2693)    with compression = None
+close  HDF5 file: /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/timeseriesResidual.h5
+
+------- processing patch 1 out of 2 --------------
+box width:  2693
+box length: 2120
+read mean incidenceAngle, slantRangeDistance, bperp value from timeseries file
+near   incidence angle : 30.6188 degree
+center incidence angle : 34.2497 degree
+far    incidence angle : 37.8806 degree
+near   range : 798990.62 m
+center range : 829948.62 m
+far    range : 860906.62 m
+skip pixels with ZERO in ALL acquisitions
+skip pixels with NaN  in ANY acquisitions
+skip pixels with ZERO temporal coherence
+number of pixels to invert: 3528650 out of 5709160 (61.8%)
+estimating DEM error ...
+--------------------------------------------------
+open  HDF5 file demErr.h5 in a mode
+writing dataset /dem                       block: [0, 2120, 0, 2693]
+close HDF5 file demErr.h5.
+--------------------------------------------------
+open  HDF5 file /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/timeseries_ERA5_ramp_demErr.h5 in a mode
+writing dataset /timeseries                block: [0, 132, 0, 2120, 0, 2693]
+close HDF5 file /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/timeseries_ERA5_ramp_demErr.h5.
+--------------------------------------------------
+open  HDF5 file /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/timeseriesResidual.h5 in a mode
+writing dataset /timeseries                block: [0, 132, 0, 2120, 0, 2693]
+close HDF5 file /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/timeseriesResidual.h5.
+
+------- processing patch 2 out of 2 --------------
+box width:  2693
+box length: 2119
+read mean incidenceAngle, slantRangeDistance, bperp value from timeseries file
+near   incidence angle : 30.6188 degree
+center incidence angle : 34.2497 degree
+far    incidence angle : 37.8806 degree
+near   range : 798990.62 m
+center range : 829948.62 m
+far    range : 860906.62 m
+skip pixels with ZERO in ALL acquisitions
+skip pixels with NaN  in ANY acquisitions
+skip pixels with ZERO temporal coherence
+number of pixels to invert: 3985455 out of 5706467 (69.8%)
+estimating DEM error ...
+--------------------------------------------------
+open  HDF5 file demErr.h5 in a mode
+writing dataset /dem                       block: [2120, 4239, 0, 2693]
+close HDF5 file demErr.h5.
+--------------------------------------------------
+open  HDF5 file /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/timeseries_ERA5_ramp_demErr.h5 in a mode
+writing dataset /timeseries                block: [0, 132, 2120, 4239, 0, 2693]
+close HDF5 file /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/timeseries_ERA5_ramp_demErr.h5.
+--------------------------------------------------
+open  HDF5 file /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/timeseriesResidual.h5 in a mode
+writing dataset /timeseries                block: [0, 132, 2120, 4239, 0, 2693]
+close HDF5 file /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/timeseriesResidual.h5.
+roll back to the original settings of ['OMP_NUM_THREADS', 'OPENBLAS_NUM_THREADS', 'MKL_NUM_THREADS', 'NUMEXPR_NUM_THREADS', 'VECLIB_MAXIMUM_THREADS']
+remove env variable OMP_NUM_THREADS
+remove env variable OPENBLAS_NUM_THREADS
+remove env variable MKL_NUM_THREADS
+remove env variable NUMEXPR_NUM_THREADS
+remove env variable VECLIB_MAXIMUM_THREADS
+time used: 03 mins 19.9 secs.
+
+
+******************** step - residual_RMS ********************
+
+timeseries_rms.py timeseriesResidual.h5 -t /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/smallbaselineApp.cfg
+read options from template file: smallbaselineApp.cfg
+remove quadratic ramp from file: timeseriesResidual.h5
+read mask file: maskTempCoh.h5
+--------------------------------------------------
+grab metadata from ref_file: timeseriesResidual.h5
+grab dataset structure from ref_file: timeseriesResidual.h5
+create HDF5 file: timeseriesResidual_ramp.h5 with w mode
+create dataset  : bperp      of float32                   in size of (132,)               with compression = None
+create dataset  : date       of |S8                       in size of (132,)               with compression = None
+create dataset  : timeseries of float32                   in size of (132, 4239, 2693)    with compression = None
+close  HDF5 file: timeseriesResidual_ramp.h5
+estimating phase ramp one date at a time ...
+[>                                                 ][>                        2%                       ] 2/132    2s /   117s[>                        2%                       ] 3/132    3s /   147s[=>                       3%                       ] 4/132    3s /   117s[=>                       4%                       ] 5/132    4s /   102s[=>                       5%                       ] 6/132    6s /   118s[=>                       5%                       ] 7/132    6s /   131s[==>                      6%                       ] 8/132    7s /   118s[===>                     7%                       ] 9/132    8s /   109s[===>                     8%                       ] 10/132    8s /   102s[===>                     8%                       ] 11/132   10s /   125s[===>                     9%                       ] 12/132   11s /   117s[====>                   10%                       ] 13/132   12s /   109s[=====>                  11%                       ] 14/132   12s /   103s[=====>                  11%                       ] 15/132   13s /   109s[=====>                  12%                       ] 16/132   18s /   135s[=====>                  13%                       ] 17/132   19s /   129s[======>                 14%                       ] 18/132   19s /   122s[======>                 14%                       ] 19/132   20s /   126s[=======>                15%                       ] 20/132   21s /   120s[=======>                16%                       ] 21/132   23s /   122s[=======>                17%                       ] 22/132   24s /   117s[=======>                17%                       ] 23/132   24s /   120s[========>               18%                       ] 24/132   25s /   115s[=========>              19%                       ] 25/132   25s /   110s[=========>              20%                       ] 26/132   27s /   111s[=========>              20%                       ] 27/132   28s /   113s[=========>              21%                       ] 28/132   29s /   109s[==========>             22%                       ] 29/132   29s /   105s[===========>            23%                       ] 30/132   30s /   101s[===========>            23%                       ] 31/132   44s /   150s[===========>            24%                       ] 32/132   45s /   144s[===========>            25%                       ] 33/132   46s /   138s[============>           26%                       ] 34/132   46s /   133s[=============>          27%                       ] 35/132   47s /   128s[=============>          27%                       ] 36/132   49s /   134s[=============>          28%                       ] 37/132   50s /   129s[=============>          29%                       ] 38/132   50s /   124s[==============>         30%                       ] 39/132   51s /   120s[==============>         30%                       ] 40/132   52s /   122s[===============>        31%                       ] 41/132   54s /   120s[===============>        32%                       ] 42/132   54s /   116s[===============>        33%                       ] 43/132   55s /   112s[===============>        33%                       ] 44/132   56s /   114s[================>       34%                       ] 45/132   56s /   110s[=================>      35%                       ] 46/132   58s /   109s[=================>      36%                       ] 47/132   59s /   106s[=================>      36%                       ] 48/132   60s /   107s[=================>      37%                       ] 49/132   60s /   103s[==================>     38%                       ] 50/132   61s /   100s[===================>    39%                       ] 51/132   63s /    99s[===================>    39%                       ] 52/132   64s /   100s[===================>    40%                       ] 53/132   65s /    97s[===================>    41%                       ] 54/132   65s /    94s[====================>   42%                       ] 55/132   66s /    91s[====================>   42%                       ] 56/132   68s /    94s[=====================>  43%                       ] 57/132   69s /    91s[=====================>  44%                       ] 58/132   69s /    88s[=====================>  45%                       ] 59/132   70s /    86s[=====================>  45%                       ] 60/132   71s /    87s[======================> 46%                       ] 61/132   73s /    85s[======================= 47%                       ] 62/132   73s /    83s[======================= 48%                       ] 63/132   74s /    80s[======================= 48%                       ] 64/132   75s /    81s[======================= 49%                       ] 65/132   75s /    78s[======================= 50%                       ] 66/132   77s /    77s[======================= 51%                       ] 67/132   78s /    75s[======================= 52%                       ] 68/132   79s /    73s[======================= 52%                       ] 69/132   79s /    73s[======================= 53%                       ] 70/132   80s /    71s[======================= 54%                       ] 71/132   94s /    80s[======================= 55%                       ] 72/132   95s /    78s[======================= 55%                       ] 73/132   96s /    78s[======================= 56%                       ] 74/132   96s /    76s[======================= 57%                       ] 75/132   97s /    73s[======================= 58% >                     ] 76/132   99s /    72s[======================= 58% >                     ] 77/132  100s /    72s[======================= 59% =>                    ] 78/132  100s /    70s[======================= 60% =>                    ] 79/132  101s /    67s[======================= 61% =>                    ] 80/132  102s /    65s[======================= 61% =>                    ] 81/132  103s /    66s[======================= 62% ==>                   ] 82/132  104s /    64s[======================= 63% ===>                  ] 83/132  105s /    61s[======================= 64% ===>                  ] 84/132  106s /    59s[======================= 64% ===>                  ] 85/132  106s /    59s[======================= 65% ===>                  ] 86/132  108s /    58s[======================= 66% ====>                 ] 87/132  109s /    56s[======================= 67% =====>                ] 88/132  110s /    54s[======================= 67% =====>                ] 89/132  110s /    54s[======================= 68% =====>                ] 90/132  111s /    52s[======================= 69% =====>                ] 91/132  113s /    50s[======================= 70% ======>               ] 92/132  114s /    48s[======================= 70% ======>               ] 93/132  114s /    49s[======================= 71% =======>              ] 94/132  115s /    47s[======================= 72% =======>              ] 95/132  116s /    45s[======================= 73% =======>              ] 96/132  117s /    43s[======================= 73% =======>              ] 97/132  118s /    43s[======================= 74% ========>             ] 98/132  119s /    41s[======================= 75% =========>            ] 99/132  119s /    39s[======================= 76% =========>            ] 100/132  120s /    38s[======================= 77% =========>            ] 101/132  122s /    36s[======================= 77% =========>            ] 102/132  123s /    36s[======================= 78% ==========>           ] 103/132  123s /    34s[======================= 79% ===========>          ] 104/132  124s /    33s[======================= 80% ===========>          ] 105/132  125s /    31s[======================= 80% ===========>          ] 106/132  127s /    31s[======================= 81% ===========>          ] 107/132  127s /    30s[======================= 82% ============>         ] 108/132  128s /    28s[======================= 83% =============>        ] 109/132  129s /    26s[======================= 83% =============>        ] 110/132  129s /    26s[======================= 84% =============>        ] 111/132  145s /    27s[======================= 85% =============>        ] 112/132  146s /    25s[======================= 86% ==============>       ] 113/132  147s /    23s[======================= 86% ==============>       ] 114/132  148s /    24s[======================= 87% ===============>      ] 115/132  148s /    22s[======================= 88% ===============>      ] 116/132  150s /    20s[======================= 89% ===============>      ] 117/132  151s /    18s[======================= 89% ===============>      ] 118/132  151s /    18s[======================= 90% ================>     ] 119/132  152s /    16s[======================= 91% =================>    ] 120/132  153s /    15s[======================= 92% =================>    ] 121/132  154s /    13s[======================= 92% =================>    ] 122/132  155s /    13s[======================= 93% =================>    ] 123/132  156s /    11s[======================= 94% ==================>   ] 124/132  157s /    10s[======================= 95% ===================>  ] 125/132  157s /     8s[======================= 95% ===================>  ] 126/132  159s /     8s[======================= 96% ===================>  ] 127/132  160s /     6s[======================= 97% ===================>  ] 128/132  160s /     4s[======================= 98% ====================> ] 129/132  167s /     3s[======================= 98% ====================> ] 130/132  167s /     3s[==================================================] 131/132[==================================================] 132/132 
+finished writing to file: timeseriesResidual_ramp.h5
+time used: 02 mins 54.4 secs.
+
+calculating residual RMS for each epoch from file: timeseriesResidual_ramp.h5
+read mask from file: maskTempCoh.h5
+reading timeseries data from file: timeseriesResidual_ramp.h5 ...
+[>                                                 ][>                        2%                       ] 2/132    0s /    13s[>                        2%                       ] 3/132    0s /    20s[=>                       3%                       ] 4/132    0s /    18s[=>                       4%                       ] 5/132    0s /    16s[=>                       5%                       ] 6/132    0s /    15s[=>                       5%                       ] 7/132    0s /    18s[==>                      6%                       ] 8/132    1s /    17s[===>                     7%                       ] 9/132    1s /    16s[===>                     8%                       ] 10/132    1s /    15s[===>                     8%                       ] 11/132    1s /    17s[===>                     9%                       ] 12/132    1s /    16s[====>                   10%                       ] 13/132    1s /    16s[=====>                  11%                       ] 14/132    1s /    15s[=====>                  11%                       ] 15/132    2s /    16s[=====>                  12%                       ] 16/132    2s /    16s[=====>                  13%                       ] 17/132    2s /    15s[======>                 14%                       ] 18/132    2s /    15s[======>                 14%                       ] 19/132    2s /    16s[=======>                15%                       ] 20/132    2s /    15s[=======>                16%                       ] 21/132    2s /    15s[=======>                17%                       ] 22/132    3s /    14s[=======>                17%                       ] 23/132    3s /    15s[========>               18%                       ] 24/132    3s /    15s[=========>              19%                       ] 25/132    3s /    14s[=========>              20%                       ] 26/132    3s /    14s[=========>              20%                       ] 27/132    3s /    15s[=========>              21%                       ] 28/132    3s /    14s[==========>             22%                       ] 29/132    4s /    14s[===========>            23%                       ] 30/132    4s /    14s[===========>            23%                       ] 31/132    4s /    14s[===========>            24%                       ] 32/132    4s /    14s[===========>            25%                       ] 33/132    4s /    13s[============>           26%                       ] 34/132    4s /    13s[=============>          27%                       ] 35/132    4s /    13s[=============>          27%                       ] 36/132    5s /    13s[=============>          28%                       ] 37/132    5s /    13s[=============>          29%                       ] 38/132    5s /    13s[==============>         30%                       ] 39/132    5s /    12s[==============>         30%                       ] 40/132    5s /    13s[===============>        31%                       ] 41/132    5s /    12s[===============>        32%                       ] 42/132    5s /    12s[===============>        33%                       ] 43/132    6s /    12s[===============>        33%                       ] 44/132    6s /    12s[================>       34%                       ] 45/132    6s /    12s[=================>      35%                       ] 46/132    6s /    11s[=================>      36%                       ] 47/132    6s /    11s[=================>      36%                       ] 48/132    6s /    11s[=================>      37%                       ] 49/132    6s /    11s[==================>     38%                       ] 50/132    6s /    11s[===================>    39%                       ] 51/132    7s /    11s[===================>    39%                       ] 52/132    7s /    11s[===================>    40%                       ] 53/132    7s /    11s[===================>    41%                       ] 54/132    7s /    10s[====================>   42%                       ] 55/132    7s /    10s[====================>   42%                       ] 56/132    7s /    10s[=====================>  43%                       ] 57/132    7s /    10s[=====================>  44%                       ] 58/132    8s /    10s[=====================>  45%                       ] 59/132    8s /    10s[=====================>  45%                       ] 60/132    8s /    10s[======================> 46%                       ] 61/132    8s /     9s[======================= 47%                       ] 62/132    8s /     9s[======================= 48%                       ] 63/132    8s /     9s[======================= 48%                       ] 64/132    8s /     9s[======================= 49%                       ] 65/132    9s /     9s[======================= 50%                       ] 66/132    9s /     9s[======================= 51%                       ] 67/132    9s /     8s[======================= 52%                       ] 68/132    9s /     8s[======================= 52%                       ] 69/132    9s /     8s[======================= 53%                       ] 70/132    9s /     8s[======================= 54%                       ] 71/132    9s /     8s[======================= 55%                       ] 72/132   10s /     8s[======================= 55%                       ] 73/132   10s /     8s[======================= 56%                       ] 74/132   10s /     8s[======================= 57%                       ] 75/132   10s /     7s[======================= 58% >                     ] 76/132   10s /     7s[======================= 58% >                     ] 77/132   10s /     7s[======================= 59% =>                    ] 78/132   10s /     7s[======================= 60% =>                    ] 79/132   11s /     7s[======================= 61% =>                    ] 80/132   11s /     7s[======================= 61% =>                    ] 81/132   11s /     7s[======================= 62% ==>                   ] 82/132   11s /     7s[======================= 63% ===>                  ] 83/132   11s /     6s[======================= 64% ===>                  ] 84/132   11s /     6s[======================= 64% ===>                  ] 85/132   11s /     6s[======================= 65% ===>                  ] 86/132   12s /     6s[======================= 66% ====>                 ] 87/132   12s /     6s[======================= 67% =====>                ] 88/132   12s /     6s[======================= 67% =====>                ] 89/132   12s /     6s[======================= 68% =====>                ] 90/132   12s /     5s[======================= 69% =====>                ] 91/132   12s /     5s[======================= 70% ======>               ] 92/132   12s /     5s[======================= 70% ======>               ] 93/132   12s /     5s[======================= 71% =======>              ] 94/132   13s /     5s[======================= 72% =======>              ] 95/132   13s /     5s[======================= 73% =======>              ] 96/132   13s /     4s[======================= 73% =======>              ] 97/132   13s /     4s[======================= 74% ========>             ] 98/132   13s /     4s[======================= 75% =========>            ] 99/132   13s /     4s[======================= 76% =========>            ] 100/132   13s /     4s[======================= 77% =========>            ] 101/132   14s /     4s[======================= 77% =========>            ] 102/132   14s /     4s[======================= 78% ==========>           ] 103/132   14s /     4s[======================= 79% ===========>          ] 104/132   14s /     3s[======================= 80% ===========>          ] 105/132   14s /     3s[======================= 80% ===========>          ] 106/132   14s /     3s[======================= 81% ===========>          ] 107/132   14s /     3s[======================= 82% ============>         ] 108/132   15s /     3s[======================= 83% =============>        ] 109/132   15s /     3s[======================= 83% =============>        ] 110/132   15s /     3s[======================= 84% =============>        ] 111/132   15s /     2s[======================= 85% =============>        ] 112/132   15s /     2s[======================= 86% ==============>       ] 113/132   15s /     2s[======================= 86% ==============>       ] 114/132   15s /     2s[======================= 87% ===============>      ] 115/132   16s /     2s[======================= 88% ===============>      ] 116/132   16s /     2s[======================= 89% ===============>      ] 117/132   16s /     2s[======================= 89% ===============>      ] 118/132   16s /     2s[======================= 90% ================>     ] 119/132   16s /     1s[======================= 91% =================>    ] 120/132   16s /     1s[======================= 92% =================>    ] 121/132   16s /     1s[======================= 92% =================>    ] 122/132   17s /     1s[======================= 93% =================>    ] 123/132   17s /     1s[======================= 94% ==================>   ] 124/132   17s /     1s[======================= 95% ===================>  ] 125/132   17s /     0s[======================= 95% ===================>  ] 126/132   17s /     0s[======================= 96% ===================>  ] 127/132   17s /     0s[======================= 97% ===================>  ] 128/132   17s /     0s[======================= 98% ====================> ] 129/132   17s /     0s[======================= 98% ====================> ] 130/132   18s /     0s[==================================================] 131/132[==================================================] 132/132/home/yukun/tools/MintPy/src/mintpy/utils/utils1.py:150: UserWarning: Input line 1 contained no data and will not be counted towards `max_rows=50000`.  This differs from the behaviour in NumPy <=1.22 which counted lines rather than rows.  If desired, the previous behaviour can be achieved by using `itertools.islice`.
+Please see the 1.23 release notes for an example on how to do this.  If you wish to ignore this warning, use `warnings.filterwarnings`.  This warning is expected to be removed in the future and is given only once per `loadtxt` call.
+  fc = np.loadtxt(rms_file, dtype=bytes).astype(str)
+/home/yukun/tools/MintPy/src/mintpy/utils/plot.py:1029: UserWarning: Input line 1 contained no data and will not be counted towards `max_rows=50000`.  This differs from the behaviour in NumPy <=1.22 which counted lines rather than rows.  If desired, the previous behaviour can be achieved by using `itertools.islice`.
+Please see the 1.23 release notes for an example on how to do this.  If you wish to ignore this warning, use `warnings.filterwarnings`.  This warning is expected to be removed in the future and is given only once per `loadtxt` call.
+  fc = np.loadtxt(rms_file, dtype=bytes).astype(str)
+ 
+save timeseries RMS to text file: /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/rms_timeseriesResidual_ramp.txt
+read timeseries residual RMS from file: /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/rms_timeseriesResidual_ramp.txt
+--------------------------------------------------
+date with min RMS: 20200109 - 0.0000
+save date to file: reference_date.txt
+--------------------------------------------------
+date(s) with RMS > 3.0 * median RMS (0.0447)
+20251120 - 0.0451
+save date(s) to file: exclude_date.txt
+save figure to file: /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/rms_timeseriesResidual_ramp.pdf
+
+
+******************** step - reference_date ********************
+
+reference_date.py -t /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/smallbaselineApp.cfg /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/timeseries.h5 /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/timeseries_ERA5.h5 /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/timeseries_ERA5_ramp.h5 /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/timeseries_ERA5_ramp_demErr.h5
+read reference date from file: reference_date.txt
+input reference date: 20200109
+--------------------------------------------------
+change reference date for file: /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/timeseries.h5
+input refDate is the same as the existing REF_DATE.
+Nothing to be done.
+--------------------------------------------------
+change reference date for file: /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/timeseries_ERA5.h5
+input refDate is the same as the existing REF_DATE.
+Nothing to be done.
+--------------------------------------------------
+change reference date for file: /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/timeseries_ERA5_ramp.h5
+input refDate is the same as the existing REF_DATE.
+Nothing to be done.
+--------------------------------------------------
+change reference date for file: /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/timeseries_ERA5_ramp_demErr.h5
+input refDate is the same as the existing REF_DATE.
+Nothing to be done.
+time used: 00 mins 13.1 secs.
+
+
+******************** step - velocity ********************
+
+timeseries2velocity.py /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/timeseries_ERA5_ramp_demErr.h5 -t /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/smallbaselineApp.cfg -o /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/velocity.h5 --update
+read options from template file: smallbaselineApp.cfg
+update mode: ON
+1) output file /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/velocity.h5 already exists.
+2) output file is NOT newer than input file: /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/timeseries_ERA5_ramp_demErr.h5.
+run or skip: run.
+open timeseries file: timeseries_ERA5_ramp_demErr.h5
+exclude date: ['20251120']
+--------------------------------------------------
+dates from input file: 132
+['20200109', '20200121', '20200202', '20200214', '20200226', '20200309', '20200321', '20200402', '20200414', '20200426', '20200508', '20200520', '20200601', '20200613', '20200625', '20200707', '20200719', '20200812', '20200824', '20200905', '20200917', '20200929', '20201011', '20201023', '20201104', '20201116', '20201128', '20201210', '20201222', '20210103', '20210115', '20210127', '20210208', '20210220', '20210304', '20210316', '20210328', '20210409', '20210421', '20210503', '20210515', '20210527', '20210608', '20210620', '20210702', '20210714', '20210726', '20210807', '20210819', '20210831', '20210912', '20210924', '20211006', '20211018', '20211030', '20211111', '20211123', '20211205', '20211217', '20211229', '20220110', '20220122', '20220203', '20220215', '20220227', '20220311', '20220323', '20220404', '20220416', '20220428', '20220510', '20220522', '20220603', '20220615', '20220627', '20220709', '20220721', '20220802', '20220814', '20220826', '20220907', '20220919', '20221001', '20221013', '20221025', '20221106', '20221118', '20221130', '20221224', '20230105', '20230117', '20230129', '20230210', '20230222', '20230306', '20230318', '20230330', '20230411', '20230423', '20230505', '20230517', '20230529', '20230809', '20230821', '20230902', '20230926', '20231020', '20231101', '20231113', '20231219', '20240124', '20240205', '20240217', '20240312', '20240324', '20240429', '20240827', '20240908', '20241002', '20250705', '20250717', '20250723', '20250804', '20250816', '20250828', '20250909', '20250921', '20251003', '20251015', '20251027', '20251108', '20251120']
+--------------------------------------------------
+dates used to estimate the time function: 131
+['20200109', '20200121', '20200202', '20200214', '20200226', '20200309', '20200321', '20200402', '20200414', '20200426', '20200508', '20200520', '20200601', '20200613', '20200625', '20200707', '20200719', '20200812', '20200824', '20200905', '20200917', '20200929', '20201011', '20201023', '20201104', '20201116', '20201128', '20201210', '20201222', '20210103', '20210115', '20210127', '20210208', '20210220', '20210304', '20210316', '20210328', '20210409', '20210421', '20210503', '20210515', '20210527', '20210608', '20210620', '20210702', '20210714', '20210726', '20210807', '20210819', '20210831', '20210912', '20210924', '20211006', '20211018', '20211030', '20211111', '20211123', '20211205', '20211217', '20211229', '20220110', '20220122', '20220203', '20220215', '20220227', '20220311', '20220323', '20220404', '20220416', '20220428', '20220510', '20220522', '20220603', '20220615', '20220627', '20220709', '20220721', '20220802', '20220814', '20220826', '20220907', '20220919', '20221001', '20221013', '20221025', '20221106', '20221118', '20221130', '20221224', '20230105', '20230117', '20230129', '20230210', '20230222', '20230306', '20230318', '20230330', '20230411', '20230423', '20230505', '20230517', '20230529', '20230809', '20230821', '20230902', '20230926', '20231020', '20231101', '20231113', '20231219', '20240124', '20240205', '20240217', '20240312', '20240324', '20240429', '20240827', '20240908', '20241002', '20250705', '20250717', '20250723', '20250804', '20250816', '20250828', '20250909', '20250921', '20251003', '20251015', '20251027', '20251108']
+--------------------------------------------------
+estimate deformation model with the following assumed time functions:
+    polynomial : 1
+    periodic   : []
+    stepDate   : []
+    polyline   : []
+    exp        : {}
+    log        : {}
+add/update the following configuration metadata:
+['startDate', 'endDate', 'excludeDate', 'polynomial', 'periodic', 'stepDate', 'exp', 'log', 'uncertaintyQuantification', 'timeSeriesCovFile', 'bootstrapCount']
+--------------------------------------------------
+create HDF5 file: /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/velocity.h5 with w mode
+create dataset  : intercept    of <class 'numpy.float32'>   in size of (4239, 2693)         with compression = None
+create dataset  : interceptStd of <class 'numpy.float32'>   in size of (4239, 2693)         with compression = None
+create dataset  : velocity     of <class 'numpy.float32'>   in size of (4239, 2693)         with compression = None
+create dataset  : velocityStd  of <class 'numpy.float32'>   in size of (4239, 2693)         with compression = None
+create dataset  : residue      of <class 'numpy.float32'>   in size of (4239, 2693)         with compression = None
+add /intercept    attribute: UNIT = m
+add /interceptStd attribute: UNIT = m
+add /velocity     attribute: UNIT = m/year
+add /velocityStd  attribute: UNIT = m/year
+add /residue      attribute: UNIT = m
+close  HDF5 file: /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/velocity.h5
+reading data from file /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/timeseries_ERA5_ramp_demErr.h5 ...
+skip pixels with zero/nan value in all acquisitions
+number of pixels to invert: 7514106 out of 11415627 (65.8%)
+estimating time functions via linalg.lstsq ...
+estimating time functions STD from time-series fitting residual ...
+--------------------------------------------------
+open  HDF5 file /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/velocity.h5 in a mode
+/home/yukun/tools/MintPy/src/mintpy/timeseries2velocity.py:276: RuntimeWarning: Mean of empty slice
+  ts_stack = np.nanmean(ts_data, axis=0)
+writing dataset /intercept                 block: [0, 4239, 0, 2693]
+close HDF5 file /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/velocity.h5.
+--------------------------------------------------
+open  HDF5 file /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/velocity.h5 in a mode
+writing dataset /interceptStd              block: [0, 4239, 0, 2693]
+close HDF5 file /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/velocity.h5.
+--------------------------------------------------
+open  HDF5 file /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/velocity.h5 in a mode
+writing dataset /velocity                  block: [0, 4239, 0, 2693]
+close HDF5 file /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/velocity.h5.
+--------------------------------------------------
+open  HDF5 file /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/velocity.h5 in a mode
+writing dataset /velocityStd               block: [0, 4239, 0, 2693]
+close HDF5 file /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/velocity.h5.
+--------------------------------------------------
+open  HDF5 file /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/velocity.h5 in a mode
+writing dataset /residue                   block: [0, 4239, 0, 2693]
+close HDF5 file /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/velocity.h5.
+time used: 00 mins 56.3 secs.
+
+timeseries2velocity.py /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/inputs/ERA5.h5 -t /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/smallbaselineApp.cfg -o /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/velocityERA5.h5 --update --ref-date 20200109 --ref-yx 3033 276
+read options from template file: smallbaselineApp.cfg
+update mode: ON
+1) output file /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/velocityERA5.h5 NOT found.
+run or skip: run.
+open timeseries file: ERA5.h5
+exclude date: ['20251120']
+--------------------------------------------------
+dates from input file: 132
+['20200109', '20200121', '20200202', '20200214', '20200226', '20200309', '20200321', '20200402', '20200414', '20200426', '20200508', '20200520', '20200601', '20200613', '20200625', '20200707', '20200719', '20200812', '20200824', '20200905', '20200917', '20200929', '20201011', '20201023', '20201104', '20201116', '20201128', '20201210', '20201222', '20210103', '20210115', '20210127', '20210208', '20210220', '20210304', '20210316', '20210328', '20210409', '20210421', '20210503', '20210515', '20210527', '20210608', '20210620', '20210702', '20210714', '20210726', '20210807', '20210819', '20210831', '20210912', '20210924', '20211006', '20211018', '20211030', '20211111', '20211123', '20211205', '20211217', '20211229', '20220110', '20220122', '20220203', '20220215', '20220227', '20220311', '20220323', '20220404', '20220416', '20220428', '20220510', '20220522', '20220603', '20220615', '20220627', '20220709', '20220721', '20220802', '20220814', '20220826', '20220907', '20220919', '20221001', '20221013', '20221025', '20221106', '20221118', '20221130', '20221224', '20230105', '20230117', '20230129', '20230210', '20230222', '20230306', '20230318', '20230330', '20230411', '20230423', '20230505', '20230517', '20230529', '20230809', '20230821', '20230902', '20230926', '20231020', '20231101', '20231113', '20231219', '20240124', '20240205', '20240217', '20240312', '20240324', '20240429', '20240827', '20240908', '20241002', '20250705', '20250717', '20250723', '20250804', '20250816', '20250828', '20250909', '20250921', '20251003', '20251015', '20251027', '20251108', '20251120']
+--------------------------------------------------
+dates used to estimate the time function: 131
+['20200109', '20200121', '20200202', '20200214', '20200226', '20200309', '20200321', '20200402', '20200414', '20200426', '20200508', '20200520', '20200601', '20200613', '20200625', '20200707', '20200719', '20200812', '20200824', '20200905', '20200917', '20200929', '20201011', '20201023', '20201104', '20201116', '20201128', '20201210', '20201222', '20210103', '20210115', '20210127', '20210208', '20210220', '20210304', '20210316', '20210328', '20210409', '20210421', '20210503', '20210515', '20210527', '20210608', '20210620', '20210702', '20210714', '20210726', '20210807', '20210819', '20210831', '20210912', '20210924', '20211006', '20211018', '20211030', '20211111', '20211123', '20211205', '20211217', '20211229', '20220110', '20220122', '20220203', '20220215', '20220227', '20220311', '20220323', '20220404', '20220416', '20220428', '20220510', '20220522', '20220603', '20220615', '20220627', '20220709', '20220721', '20220802', '20220814', '20220826', '20220907', '20220919', '20221001', '20221013', '20221025', '20221106', '20221118', '20221130', '20221224', '20230105', '20230117', '20230129', '20230210', '20230222', '20230306', '20230318', '20230330', '20230411', '20230423', '20230505', '20230517', '20230529', '20230809', '20230821', '20230902', '20230926', '20231020', '20231101', '20231113', '20231219', '20240124', '20240205', '20240217', '20240312', '20240324', '20240429', '20240827', '20240908', '20241002', '20250705', '20250717', '20250723', '20250804', '20250816', '20250828', '20250909', '20250921', '20251003', '20251015', '20251027', '20251108']
+--------------------------------------------------
+estimate deformation model with the following assumed time functions:
+    polynomial : 1
+    periodic   : []
+    stepDate   : []
+    polyline   : []
+    exp        : {}
+    log        : {}
+add/update the following configuration metadata:
+['startDate', 'endDate', 'excludeDate', 'polynomial', 'periodic', 'stepDate', 'exp', 'log', 'uncertaintyQuantification', 'timeSeriesCovFile', 'bootstrapCount']
+--------------------------------------------------
+create HDF5 file: /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/velocityERA5.h5 with w mode
+create dataset  : intercept    of <class 'numpy.float32'>   in size of (4239, 2693)         with compression = None
+create dataset  : interceptStd of <class 'numpy.float32'>   in size of (4239, 2693)         with compression = None
+create dataset  : velocity     of <class 'numpy.float32'>   in size of (4239, 2693)         with compression = None
+create dataset  : velocityStd  of <class 'numpy.float32'>   in size of (4239, 2693)         with compression = None
+create dataset  : residue      of <class 'numpy.float32'>   in size of (4239, 2693)         with compression = None
+add /intercept    attribute: UNIT = m
+add /interceptStd attribute: UNIT = m
+add /velocity     attribute: UNIT = m/year
+add /velocityStd  attribute: UNIT = m/year
+add /residue      attribute: UNIT = m
+close  HDF5 file: /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/velocityERA5.h5
+reading data from file /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/inputs/ERA5.h5 ...
+referecing to date: 20200109
+referencing to point (y, x): (3033, 276)
+skip pixels with zero/nan value in all acquisitions
+number of pixels to invert: 11302521 out of 11415627 (99.0%)
+estimating time functions via linalg.lstsq ...
+estimating time functions STD from time-series fitting residual ...
+--------------------------------------------------
+open  HDF5 file /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/velocityERA5.h5 in a mode
+writing dataset /intercept                 block: [0, 4239, 0, 2693]
+close HDF5 file /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/velocityERA5.h5.
+--------------------------------------------------
+open  HDF5 file /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/velocityERA5.h5 in a mode
+writing dataset /interceptStd              block: [0, 4239, 0, 2693]
+close HDF5 file /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/velocityERA5.h5.
+--------------------------------------------------
+open  HDF5 file /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/velocityERA5.h5 in a mode
+writing dataset /velocity                  block: [0, 4239, 0, 2693]
+close HDF5 file /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/velocityERA5.h5.
+--------------------------------------------------
+open  HDF5 file /home/yukun/InSAR/Yajiang_asc_26-93_20-24/mintpy_hyp3/velocityERA5.h5 in a mode
+/home/yukun/tools/MintPy/src/mintpy/view.py:1435: UserWarning: This figure includes Axes that are not compatible with tight_layout, so results might be incorrect.
+  fig.tight_layout()

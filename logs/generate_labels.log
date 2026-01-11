@@ -1,0 +1,13 @@
+2026-01-11 10:23:57,805 [INFO] >>> Starting Program 3: Label Generation
+2026-01-11 10:23:57,814 [INFO] Loading SU Grid: su_a50000_c03_geo.tif
+2026-01-11 10:23:58,407 [INFO] Loading Inventory: Sample_Yajiang_list_nodata.tif
+2026-01-11 10:24:01,427 [INFO] Found 8483 unique Slope Units.
+2026-01-11 10:24:01,427 [INFO] Calculating landslide pixel counts per SU...
+2026-01-11 10:24:05,672 [INFO] ----------------------------------------
+2026-01-11 10:24:05,672 [INFO] Label Generation Statistics (static):
+2026-01-11 10:24:05,672 [INFO]   Total SUs: 8483
+2026-01-11 10:24:05,672 [INFO]   Positive (Unstable): 327 (3.85%)
+2026-01-11 10:24:05,673 [INFO]   Negative (Stable)  : 8156
+2026-01-11 10:24:05,673 [INFO] ----------------------------------------
+2026-01-11 10:24:05,713 [INFO] Saved labels to: E:\Document\paper_library\5th_paper_InSAR\datasets\04_tabular_SU\su_labels_static.parquet
+2026-01-11 10:24:05,713 [INFO] Total Time: 7.91 seconds

@@ -1,0 +1,18 @@
+2026-01-10 23:23:28,927 [INFO] ============================================================
+2026-01-10 23:23:28,927 [INFO] >>> Program 6-ML: SVM (Linear SGD) Baseline | Mode: dynamic
+2026-01-10 23:23:28,927 [INFO] ============================================================
+2026-01-10 23:23:28,928 [INFO] Loading data from: tabular_dataset_dynamic.parquet
+2026-01-10 23:23:28,973 [INFO]   Features: 66 columns
+2026-01-10 23:23:28,973 [INFO]   Train (Filtered): 324 | Test: 4105
+2026-01-10 23:23:28,982 [INFO] Building Pipeline (Scaler -> LinearSVM)...
+2026-01-10 23:23:28,982 [INFO] Training...
+2026-01-10 23:23:29,334 [INFO] ✔ Model saved.
+2026-01-10 23:23:29,334 [INFO] Evaluating on Test Set...
+2026-01-10 23:23:29,350 [INFO]   ROC-AUC        : 0.7986
+2026-01-10 23:23:29,351 [INFO]   PR-AUC         : 0.1638
+2026-01-10 23:23:29,351 [INFO]   Accuracy       : 0.6248
+2026-01-10 23:23:29,351 [INFO]   Recall         : 0.7818
+2026-01-10 23:23:29,351 [INFO]   Precision      : 0.0790
+2026-01-10 23:23:29,351 [INFO]   F1-Score       : 0.1435
+2026-01-10 23:23:29,377 [INFO] ✔ Predictions saved.
+2026-01-10 23:23:29,390 [INFO] ✔ Feature coefficients saved.

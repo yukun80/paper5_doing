@@ -1,0 +1,17 @@
+2026-01-11 10:24:35,367 [INFO] ============================================================
+2026-01-11 10:24:35,368 [INFO] >>> Program 6-ML: Random Forest (Refactored) | Mode: static
+2026-01-11 10:24:35,368 [INFO] ============================================================
+2026-01-11 10:24:35,368 [INFO] Loading data from: tabular_dataset_static.parquet
+2026-01-11 10:24:35,413 [INFO]   Features: 54 columns
+2026-01-11 10:24:35,413 [INFO]   Train (Filtered): 324 | Test: 4105
+2026-01-11 10:24:35,428 [INFO] Training Random Forest...
+2026-01-11 10:24:35,756 [INFO] ✔ Model saved.
+2026-01-11 10:24:35,757 [INFO] Evaluating on Test Set...
+2026-01-11 10:24:35,817 [INFO]   ROC-AUC        : 0.8319
+2026-01-11 10:24:35,818 [INFO]   PR-AUC         : 0.1665
+2026-01-11 10:24:35,818 [INFO]   Accuracy       : 0.7920
+2026-01-11 10:24:35,818 [INFO]   Recall         : 0.6000
+2026-01-11 10:24:35,818 [INFO]   Precision      : 0.1116
+2026-01-11 10:24:35,818 [INFO]   F1-Score       : 0.1882
+2026-01-11 10:24:35,872 [INFO] ✔ Predictions saved.
+2026-01-11 10:24:35,904 [INFO] ✔ Feature importance saved.

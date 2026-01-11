@@ -1,0 +1,9 @@
+=== Static Bias Analysis Report ===
+Model: XGBoost Baseline | Mode: static
+Metric: Total Information Gain
+
+Static Importance  : 100.00%
+Dynamic Importance : 0.00%
+
+Conclusion:
+[CONFIRMED] Model exhibits strong Static Bias (>70%).

@@ -1,0 +1,31 @@
+# vim: set filetype=cfg:
+mintpy.load.processor       = hyp3
+##---------interferogram datasets:
+mintpy.load.unwFile         = ../hyp3/*/*unw_phase_clip*.tif
+mintpy.load.corFile         = ../hyp3/*/*corr_clip*.tif
+##---------geometry datasets:
+mintpy.load.demFile         = ../hyp3/*/*dem_clip*.tif
+mintpy.load.incAngleFile    = ../hyp3/*/*lv_theta_clip*.tif
+mintpy.load.azAngleFile      = ../hyp3/*/*lv_phi_clip*.tif
+mintpy.load.waterMaskFile   = ../hyp3/*/*water_mask_clip*.tif
+##---------subset (optional):
+## if both yx and lalo are specified, use lalo option unless a) no lookup file AND b) dataset is in radar coord
+mintpy.subset.yx            = auto    #[y0:y1,x0:x1 / no], auto for no
+mintpy.subset.lalo          = auto    #[S:N,W:E / no], auto for no
+
+mintpy.compute.maxMemory                              = 24
+mintpy.compute.numWorker                               = 8
+mintpy.network.coherenceBased                          = yes
+mintpy.network.minCoherence                            = 0.5
+mintpy.networkInversion.minTempCoh               = 0.6  # 默认0.7，山区建议降到0.4或0.5
+mintpy.reference.yx                                               = auto
+mintpy.troposphericDelay.method                        = pyaps
+mintpy.topographicResidual.pixelwiseGeometry           = no
+mintpy.topographicResidual.phaseVelocity               = yes
+mintpy.reference.minCoherence                          = 0.85
+mintpy.deramp                                                     = quadratic
+mintpy.unwrapError.method                                = auto
+mintpy.unwrapError.waterMaskFile                      = auto
+mintpy.unwrapError.numSample                         = 300    # 默认是100，山区可以增加采样点
+mintpy.unwrapError.bit                                          = 64     # 使用64位计算，防止溢出（可选）
+
