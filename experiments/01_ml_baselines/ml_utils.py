@@ -81,7 +81,9 @@ def load_and_split_data(
             "su_id", "label", "split", 
             "ratio", "slide_pixels", "total_pixels", 
             "centroid_x", "centroid_y", "geometry",
-            "train_sample_mask"
+            "train_sample_mask",
+            # Exclude InSAR constraint columns (Physical validation only, not input features)
+            "mean_vel", "top20_abs_mean", "is_stable"
         ]
 
     # Identify features

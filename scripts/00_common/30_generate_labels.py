@@ -23,13 +23,17 @@ import rasterio
 import scipy.ndimage
 import yaml
 
+# Import custom path utility
+sys.path.append(str(Path(__file__).resolve().parent))
+import path_utils
+
 # ==============================================================================
 # CONFIGURATION & CONSTANTS
 # ==============================================================================
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 DEFAULT_CONFIG_PATH = BASE_DIR / "metadata" / "dataset_config_dynamic.yaml"
-OUTPUT_DIR = BASE_DIR / "04_tabular_SU"
+BASE_OUTPUT_DIR = BASE_DIR / "04_tabular_SU"
 LOG_DIR = BASE_DIR / "logs"
 
 # Setup Logging
@@ -93,10 +97,14 @@ def main():
     args = parser.parse_args()
 
     mode = args.mode
-    output_parquet = OUTPUT_DIR / f"su_labels_{mode}.parquet"
-
-    # 2. Load Config & Paths
+    
+    # 2. Load Config to resolve paths
     config = load_config(args.config)
+    output_dir = path_utils.resolve_su_path(BASE_OUTPUT_DIR, config=config)
+    output_parquet = output_dir / f"su_labels_{mode}.parquet"
+    
+    logger.info(f"Resolved Output Directory: {output_dir}")
+
     grid_files = config.get("grid", {}).get("files", {})
 
     su_filename = grid_files.get("su_id")
@@ -161,7 +169,6 @@ def main():
     logger.info("-" * 40)
 
     # 10. Save
-    OUTPUT_DIR.mkdir(exist_ok=True)
     df.to_parquet(output_parquet, compression="snappy")
 
     elapsed = time.time() - start_time

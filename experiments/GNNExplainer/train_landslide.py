@@ -38,18 +38,28 @@ import models
 from adapter import LandslideDataAdapter
 import utils.io_utils as io_utils
 
+# Import custom path utility
+SCRIPTS_DIR = Path(__file__).resolve().parent.parent.parent / "scripts" / "00_common"
+sys.path.append(str(SCRIPTS_DIR))
+import path_utils
+import yaml
+
 # ==============================================================================
 # CONFIGURATION
 # ==============================================================================
-BASE_DIR = CURRENT_DIR.parent.parent
-CHECKPOINT_DIR = CURRENT_DIR / "checkpoints"
-CHECKPOINT_DIR.mkdir(parents=True, exist_ok=True)
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+# Base directory for checkpoints, sub-dirs created dynamically
+BASE_CHECKPOINT_DIR = Path(__file__).resolve().parent / "checkpoints"
+BASE_LOG_DIR = Path(__file__).resolve().parent / "logs"
+
+# Placeholders resolved in train()
+CHECKPOINT_DIR = None
 
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
     handlers=[
-        logging.FileHandler(CURRENT_DIR / "logs" / "training.log", mode="w", encoding="utf-8"),
+        logging.FileHandler(BASE_LOG_DIR / "training.log", mode="w", encoding="utf-8"),
         logging.StreamHandler(sys.stdout)
     ]
 )
@@ -60,8 +70,17 @@ logger = logging.getLogger(__name__)
 # ==============================================================================
 
 def train(args):
+    # 0. Resolve Config and Paths
+    config_path = BASE_DIR / "metadata" / f"dataset_config_{args.mode}.yaml"
+    with open(config_path, "r", encoding="utf-8") as f:
+        config = yaml.safe_load(f)
+    
+    global CHECKPOINT_DIR
+    CHECKPOINT_DIR = path_utils.resolve_su_path(BASE_CHECKPOINT_DIR, config=config)
+    logger.info(f"Resolved Checkpoint Directory: {CHECKPOINT_DIR}")
+
     # 1. Load Data
-    adapter = LandslideDataAdapter(base_dir=BASE_DIR, mode=args.mode)
+    adapter = LandslideDataAdapter(base_dir=BASE_DIR, mode=args.mode, config_path=config_path)
     adapter.load_data()
     data = adapter.get_processed_data()
     

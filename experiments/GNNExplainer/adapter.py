@@ -27,6 +27,15 @@ import pandas as pd
 import torch
 import yaml
 
+# Import custom path utility
+COMMON_UTILS_DIR = Path(__file__).resolve().parent.parent.parent / "scripts" / "00_common"
+sys.path.append(str(COMMON_UTILS_DIR))
+try:
+    import path_utils
+except ImportError:
+    # Fallback if scripts/00_common is not in expected location
+    path_utils = None
+
 # ==============================================================================
 # LOGGING SETUP
 # ==============================================================================
@@ -47,20 +56,32 @@ class LandslideDataAdapter:
     Adapts Landslide Susceptibility data (Parquet) for GNNExplainer (Dense Tensors).
     """
 
-    def __init__(self, base_dir: Union[str, Path], mode: str = "dynamic"):
+    def __init__(self, base_dir: Union[str, Path], mode: str = "dynamic", config_path: Optional[Union[str, Path]] = None):
         """
         Initialize the adapter.
 
         Args:
             base_dir: Root directory of the dataset (e.g., .../datasets).
             mode: Experiment mode ('dynamic' or 'static'). Determines which files to load.
+            config_path: Path to the dataset config YAML.
         """
         self.base_dir = Path(base_dir)
         self.mode = mode.lower()
         
-        # Define Paths
-        self.tabular_path = self.base_dir / "04_tabular_SU" / f"tabular_dataset_{self.mode}.parquet"
-        self.edges_path = self.base_dir / "05_graph_SU" / f"edges_{self.mode}.parquet"
+        # Load Config to resolve SU-specific paths
+        if config_path is None:
+            config_path = self.base_dir / "metadata" / f"dataset_config_{self.mode}.yaml"
+        
+        with open(config_path, "r", encoding="utf-8") as f:
+            config = yaml.safe_load(f)
+            
+        su_name = "default_su"
+        if path_utils:
+            su_name = path_utils.get_su_name(config)
+            
+        # Define Paths with SU Subdirectories
+        self.tabular_path = self.base_dir / "04_tabular_SU" / su_name / f"tabular_dataset_{self.mode}.parquet"
+        self.edges_path = self.base_dir / "05_graph_SU" / su_name / f"edges_{self.mode}.parquet"
         
         # State placeholders
         self.df_features: Optional[pd.DataFrame] = None
@@ -167,9 +188,19 @@ class LandslideDataAdapter:
             torch.Tensor: Float tensor of shape [1, N, F].
         """
         # Identify feature columns
-        # Exclude metadata columns
-        exclude = ["su_id", "label", "split", "train_sample_mask", "ratio", "geometry"]
-        feat_cols = [c for c in self.df_features.columns if c not in exclude]
+        # Exclude metadata columns (Strictly aligned with ml_utils.py)
+        exclude = [
+            "su_id", "label", "split", 
+            "train_sample_mask", "ratio", "geometry",
+            "slide_pixels", "total_pixels", 
+            "centroid_x", "centroid_y",
+            # Exclude InSAR constraints to avoid leakage
+            "mean_vel", "top20_abs_mean", "is_stable"
+        ]
+        
+        # Also exclude any column that starts with 'Unnamed' or is obviously metadata
+        all_cols = self.df_features.columns
+        feat_cols = [c for c in all_cols if c not in exclude and not c.startswith("Unnamed")]
         
         self.feature_names = feat_cols
         
@@ -229,6 +260,8 @@ class LandslideDataAdapter:
             "label": self.label_tensor,      # [1, N]
             "train_idx": self.train_idx,     # List[int]
             "test_idx": self.test_idx,       # List[int]
+            "train_mask": self.train_mask,   # Array[bool]
+            "test_mask": self.test_mask,     # Array[bool]
             "node_ids": self.node_ids,       # Array[int] (Original SU IDs)
             "feature_names": self.feature_names # List[str]
         }

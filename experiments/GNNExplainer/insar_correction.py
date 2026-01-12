@@ -32,19 +32,37 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import rasterio
+import yaml
+
+# Import custom path utility
+SCRIPTS_DIR = Path(__file__).resolve().parent.parent.parent / "scripts" / "00_common"
+sys.path.append(str(SCRIPTS_DIR))
+import path_utils
 
 # ==============================================================================
 # CONFIGURATION
 # ==============================================================================
-CURRENT_DIR = Path(__file__).resolve().parent
-BASE_DIR = CURRENT_DIR.parent.parent
-INFERENCE_DIR = CURRENT_DIR / "inference_results"
-OUTPUT_DIR = CURRENT_DIR / "final_maps"
-OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+BASE_INFERENCE_DIR = Path(__file__).resolve().parent / "inference_results"
+BASE_OUTPUT_DIR = Path(__file__).resolve().parent / "final_maps"
 
 # InSAR Configuration
 INSAR_FILE_PATTERN = "InSAR_desc_2024_2025*nodata.tif"
 DEFORMATION_THRESHOLD_MM = 10.0 # mm/year (Absolute value)
+
+# Resolved dynamically
+INFERENCE_DIR = None
+OUTPUT_DIR = None
+
+def resolve_paths(mode):
+    config_path = BASE_DIR / "metadata" / f"dataset_config_{mode}.yaml"
+    with open(config_path, "r", encoding="utf-8") as f:
+        config = yaml.safe_load(f)
+    
+    global INFERENCE_DIR, OUTPUT_DIR
+    INFERENCE_DIR = path_utils.resolve_su_path(BASE_INFERENCE_DIR, config=config)
+    OUTPUT_DIR = path_utils.resolve_su_path(BASE_OUTPUT_DIR, config=config)
+    return config
 
 logging.basicConfig(
     level=logging.INFO,
@@ -58,6 +76,10 @@ logger = logging.getLogger(__name__)
 # ==============================================================================
 
 def main(args):
+    # 0. Resolve Paths
+    config = resolve_paths(args.mode)
+    logger.info(f"Resolved Final Maps Directory: {OUTPUT_DIR}")
+
     # 1. Load GCN Predictions (CSV)
     csv_path = INFERENCE_DIR / f"gcn_predictions_{args.mode}.csv"
     if not csv_path.exists():
@@ -79,7 +101,9 @@ def main(args):
     logger.info(f"Loading InSAR Data: {insar_path.name}")
     
     # 3. Spatial Mapping setup
-    su_raster_path = BASE_DIR / "02_aligned_grid" / "su_a50000_c03_geo.tif"
+    # DYNAMICALLY get SU grid filename from config
+    su_filename = config.get("grid", {}).get("files", {}).get("su_id")
+    su_raster_path = BASE_DIR / "02_aligned_grid" / su_filename
     
     with rasterio.open(su_raster_path) as src_su, rasterio.open(insar_path) as src_insar:
         su_grid = src_su.read(1)
@@ -101,7 +125,8 @@ def main(args):
     lut = np.full(max_id + 1000, -9999.0, dtype=np.float32)
     
     ids = df_pred["su_id"].values.astype(int)
-    probs = df_pred["gcn_prob"].values.astype(np.float32)
+    # Column name fix: use 'prob' instead of 'gcn_prob'
+    probs = df_pred["prob"].values.astype(np.float32)
     
     # Safety clip
     valid_mask = ids < len(lut)

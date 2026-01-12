@@ -33,19 +33,40 @@ sys.path.append(str(CURRENT_DIR))
 import models
 from adapter import LandslideDataAdapter
 
+# Import custom path utility
+SCRIPTS_DIR = Path(__file__).resolve().parent.parent.parent / "scripts" / "00_common"
+sys.path.append(str(SCRIPTS_DIR))
+import path_utils
+import yaml
+
 # ==============================================================================
 # CONFIGURATION
 # ==============================================================================
-BASE_DIR = CURRENT_DIR.parent.parent
-OUTPUT_DIR = CURRENT_DIR / "inference_results"
-OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+BASE_INFERENCE_DIR = Path(__file__).resolve().parent / "inference_results"
+BASE_CHECKPOINT_DIR = Path(__file__).resolve().parent / "checkpoints"
+BASE_LOG_DIR = Path(__file__).resolve().parent / "logs"
+
+# Resolved dynamically
+INFERENCE_DIR = None
+CHECKPOINT_DIR = None
+
+def resolve_paths(mode):
+    config_path = BASE_DIR / "metadata" / f"dataset_config_{mode}.yaml"
+    with open(config_path, "r", encoding="utf-8") as f:
+        config = yaml.safe_load(f)
+    
+    global INFERENCE_DIR, CHECKPOINT_DIR
+    INFERENCE_DIR = path_utils.resolve_su_path(BASE_INFERENCE_DIR, config=config)
+    CHECKPOINT_DIR = path_utils.resolve_su_path(BASE_CHECKPOINT_DIR, config=config)
+    return config_path
 
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
     handlers=[
-        logging.StreamHandler(sys.stdout),
-        logging.FileHandler(CURRENT_DIR / "logs" / "inference.log", mode="w", encoding="utf-8"),
+        logging.FileHandler(BASE_LOG_DIR / "inference.log", mode="w", encoding="utf-8"),
+        logging.StreamHandler(sys.stdout)
     ]
 )
 logger = logging.getLogger(__name__)
@@ -101,29 +122,46 @@ def map_predictions_to_raster(df_pred: pd.DataFrame, ref_raster_path: Path, outp
 
 
 def main(args):
+    # 0. Resolve Paths
+    config_path = resolve_paths(args.mode)
+    logger.info(f"Results will be saved to: {INFERENCE_DIR}")
+
     # 1. Load Data
     logger.info("Loading Data...")
-    adapter = LandslideDataAdapter(base_dir=BASE_DIR, mode=args.mode)
+    adapter = LandslideDataAdapter(base_dir=BASE_DIR, mode=args.mode, config_path=config_path)
     adapter.load_data()
     data = adapter.get_processed_data()
     
+    # Extract data components
+    feat = data["feat"]
+    adj = data["adj"]
+    label = data["label"]
+    node_ids = data["node_ids"]
+    test_mask = data["test_mask"]
+    
+    input_dim = feat.size(2)
+    num_classes = 2
+
     # 2. Load Model
-    ckpt_path = CURRENT_DIR / "checkpoints" / f"landslide_model_{args.mode}_best.pth.tar"
-    if not ckpt_path.exists():
-        logger.critical(f"Checkpoint not found: {ckpt_path}")
+    checkpoint_path = CHECKPOINT_DIR / f"landslide_model_{args.mode}_best.pth.tar"
+    if not checkpoint_path.exists():
+        logger.error(f"Checkpoint not found: {checkpoint_path}")
         return
 
-    logger.info(f"Loading checkpoint: {ckpt_path.name}")
-    # Fix for PyTorch 2.6+: explicit weights_only=False since we load full objects
-    checkpoint = torch.load(ckpt_path, weights_only=False)
+    logger.info(f"Loading checkpoint: {checkpoint_path}")
     
-    input_dim = data["feat"].size(2)
+    # Robust device handling
+    device = torch.device('cuda' if torch.cuda.is_available() and args.gpu else 'cpu')
+    logger.info(f"Using device: {device}")
     
+    checkpoint = torch.load(checkpoint_path, map_location=device, weights_only=False)
+    
+    # ... (Rest of model loading)
     model = models.GcnEncoderNode(
         input_dim=input_dim,
         hidden_dim=args.hidden_dim,
         embedding_dim=args.output_dim,
-        label_dim=2,
+        label_dim=num_classes,
         num_layers=args.num_layers,
         bn=args.bn,
         dropout=0.0,
@@ -131,40 +169,43 @@ def main(args):
     )
     model.load_state_dict(checkpoint["model_state"])
     
-    if args.gpu and torch.cuda.is_available():
-        model = model.cuda()
-        feat = data["feat"].cuda()
-        adj = data["adj"].cuda()
-    else:
-        feat = data["feat"]
-        adj = data["adj"]
-
-    # 3. Run Inference
-    logger.info("Running inference on FULL dataset...")
+    model = model.to(device)
+    feat = feat.to(device)
+    adj = adj.to(device)
     model.eval()
+
+    # 3. Predict
     with torch.no_grad():
         ypred, _ = model(feat, adj)
-        # ypred: [1, N, 2]
         probs = torch.softmax(ypred[0], dim=1)[:, 1].cpu().numpy()
         preds = torch.argmax(ypred[0], dim=1).cpu().numpy()
 
-    # 4. Save CSV Results
-    df_res = pd.DataFrame({
-        "su_id": data["node_ids"],
-        "gcn_prob": probs,
-        "gcn_pred": preds,
-        "label": data["label"][0].cpu().numpy() # Add ground truth for reference
+    # 4. Save CSV
+    out_df = pd.DataFrame({
+        "su_id": node_ids,
+        "label": label[0].cpu().numpy(),
+        "prob": probs, # Column name 'prob' matches convention
+        "gcn_prob": probs, # Keep 'gcn_prob' for compatibility with map function if needed, or update map function
+        "pred": preds,
+        "split": ["test" if mask else "train" for mask in test_mask]
     })
     
-    csv_path = OUTPUT_DIR / f"gcn_predictions_{args.mode}.csv"
-    df_res.to_csv(csv_path, index=False)
-    logger.info(f"Saved tabular predictions: {csv_path}")
+    out_csv = INFERENCE_DIR / f"gcn_predictions_{args.mode}.csv"
+    out_df.to_csv(out_csv, index=False)
+    logger.info(f"Full predictions saved to: {out_csv}")
 
     # 5. Map to Raster
-    su_raster_path = BASE_DIR / "02_aligned_grid" / "su_a50000_c03_geo.tif"
-    tif_path = OUTPUT_DIR / f"LSM_GCN_Raw_{args.mode}.tif"
+    # Resolve SU raster path dynamically
+    with open(config_path, "r", encoding="utf-8") as f:
+        config = yaml.safe_load(f)
+    su_filename = config.get("grid", {}).get("files", {}).get("su_id")
+    su_raster_path = BASE_DIR / "02_aligned_grid" / su_filename
     
-    map_predictions_to_raster(df_res, su_raster_path, tif_path)
+    if not su_raster_path.exists():
+        logger.warning(f"SU Raster not found at {su_raster_path}, skipping map generation.")
+    else:
+        tif_path = INFERENCE_DIR / f"LSM_GCN_Raw_{args.mode}.tif"
+        map_predictions_to_raster(out_df, su_raster_path, tif_path)
     
     logger.info("Inference Complete.")
 

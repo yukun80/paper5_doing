@@ -20,6 +20,10 @@ import rasterio
 import yaml
 from rasterio.enums import Resampling
 
+# Import custom path utility
+sys.path.append(str(Path(__file__).resolve().parent))
+import path_utils
+
 # ==============================================================================
 # CONFIGURATION & CONSTANTS
 # ==============================================================================
@@ -27,13 +31,13 @@ from rasterio.enums import Resampling
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 DEFAULT_CONFIG_PATH = BASE_DIR / "metadata" / "dataset_config_dynamic.yaml"
 INPUT_DIR = BASE_DIR / "02_aligned_grid"
-OUTPUT_DIR = BASE_DIR / "03_stacked_data"
-OUTPUT_TIF = OUTPUT_DIR / "Post_stack.tif"
-OUTPUT_META = BASE_DIR / "metadata" / "stack_metadata_post.json"
+BASE_OUTPUT_DIR = BASE_DIR / "03_stacked_data"
 LOG_DIR = BASE_DIR / "logs"
 
-# Ensure output directory exists
-OUTPUT_DIR.mkdir(exist_ok=True)
+# Output paths will be resolved dynamically in main()
+OUTPUT_DIR = None
+OUTPUT_TIF = None
+OUTPUT_META = None
 
 # Setup Logging
 LOG_DIR.mkdir(exist_ok=True)
@@ -134,13 +138,18 @@ def main():
     mode = args.mode
     logger.info(f"Using Configuration: {config_path} (Mode: {mode})")
 
-    # Update Output Paths based on Mode
-    global OUTPUT_TIF, OUTPUT_META
-    OUTPUT_TIF = OUTPUT_DIR / f"Post_stack_{mode}.tif"
-    OUTPUT_META = BASE_DIR / "metadata" / f"stack_metadata_post_{mode}.json"
-
     # 1. Load Configuration
     config = load_config(config_path)
+    
+    # 2. Update Output Paths based on SU Name and Mode
+    global OUTPUT_DIR, OUTPUT_TIF, OUTPUT_META
+    OUTPUT_DIR = path_utils.resolve_su_path(BASE_OUTPUT_DIR, config=config)
+    OUTPUT_TIF = OUTPUT_DIR / f"Post_stack_{mode}.tif"
+    # Metadata also moves to the SU-specific directory for consistency
+    OUTPUT_META = OUTPUT_DIR / f"stack_metadata_post_{mode}.json"
+    
+    logger.info(f"Resolved Output Directory: {OUTPUT_DIR}")
+
     grid_cfg = config.get("grid", {})
     factors = config.get("factors", [])
 

@@ -15,8 +15,9 @@ Date: 2026-01-05
 """
 
 import logging
+import yaml
 from pathlib import Path
-from typing import Tuple, Dict, Optional
+from typing import Tuple, Dict, Optional, Union
 
 import numpy as np
 import pandas as pd
@@ -24,23 +25,45 @@ import scipy.sparse as sp
 import torch
 from sklearn.preprocessing import StandardScaler
 
+# Import custom path utility
+import sys
+SCRIPTS_DIR = Path(__file__).resolve().parent.parent.parent / "scripts" / "00_common"
+sys.path.append(str(SCRIPTS_DIR))
+try:
+    import path_utils
+except ImportError:
+    path_utils = None
+
 logger = logging.getLogger(__name__)
 
 class GCNDataLoader:
-    def __init__(self, base_dir: Path, device: str = "cpu"):
+    def __init__(self, base_dir: Path, device: str = "cpu", config_path: Optional[Union[str, Path]] = None):
         """
         Args:
             base_dir (Path): Project root directory.
             device (str): Computation device ('cpu' or 'cuda').
+            config_path (Path, optional): Path to the dataset config YAML.
         """
         self.base_dir = base_dir
         self.device = device
-        self.data_dir = base_dir / "04_tabular_SU"
-        self.graph_dir = base_dir / "05_graph_SU"
+        
+        # Resolve SU-specific directories
+        su_name = "default_su"
+        if config_path and path_utils:
+            with open(config_path, "r", encoding="utf-8") as f:
+                config = yaml.safe_load(f)
+            su_name = path_utils.get_su_name(config)
+            
+        self.data_dir = self.base_dir / "04_tabular_SU"
+        self.graph_dir = self.base_dir / "05_graph_SU"
+        
+        if path_utils:
+            self.data_dir = path_utils.resolve_su_path(self.data_dir, su_name=su_name)
+            self.graph_dir = path_utils.resolve_su_path(self.graph_dir, su_name=su_name)
         
         # Validation
         if not self.data_dir.exists() or not self.graph_dir.exists():
-            raise FileNotFoundError(f"Critical data directories missing in {base_dir}")
+            logger.warning(f"Data directories missing in {base_dir} for SU {su_name}. Ensure Phase 0 is run.")
 
     def _load_raw_data(self) -> Tuple[pd.DataFrame, pd.DataFrame]:
         """Loads parquet files with error handling."""

@@ -42,21 +42,15 @@ import rasterio
 CURRENT_DIR = Path(__file__).resolve().parent
 BASE_DIR = CURRENT_DIR.parent.parent.parent  # Up to datasets root
 CONFIG_PATH = BASE_DIR / "metadata" / "xgboost_config.yaml"
-SU_ID_RASTER = BASE_DIR / "02_aligned_grid" / "su_a50000_c03_geo.tif"
+
+# Import custom path utility
+import sys
+SCRIPTS_DIR = BASE_DIR / "scripts" / "00_common"
+sys.path.append(str(SCRIPTS_DIR))
+import path_utils
 
 # Setup Logging
-# Ensure results dir exists for logging
-RESULTS_LOG_DIR = CURRENT_DIR / "results"
-RESULTS_LOG_DIR.mkdir(parents=True, exist_ok=True)
-
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(message)s",
-    handlers=[
-        logging.StreamHandler(sys.stdout),
-        logging.FileHandler(RESULTS_LOG_DIR / "inference.log", mode="w", encoding="utf-8"),
-    ],
-)
+# Placeholder, will be updated in __init__
 logger = logging.getLogger(__name__)
 
 
@@ -74,22 +68,42 @@ class XGBoostInference:
         self.config_path = config_path
         self.mode = mode
         self.config = self._load_config()
-        self.output_dir = Path(self.config["experiment"]["output_dir"])
+        
+        # Load Dataset Config to resolve SU name
+        self.dataset_config_path = BASE_DIR / "metadata" / f"dataset_config_{self.mode}.yaml"
+        with open(self.dataset_config_path, "r", encoding="utf-8") as f:
+            self.dataset_config = yaml.safe_load(f)
+            
+        self.su_name = path_utils.get_su_name(self.dataset_config)
+        
+        # Setup workspace with SU subdirectories
+        base_output_dir = Path(self.config["experiment"]["output_dir"])
+        self.output_dir = path_utils.resolve_su_path(base_output_dir, su_name=self.su_name)
+        
+        # Avoid double resolution
         self.results_dir = self.output_dir / "results"
         self.models_dir = self.output_dir / "models"
         
-        self.results_dir.mkdir(parents=True, exist_ok=True)
-        # Models dir should already exist from training, but checking is fine.
+        # Initialize Logging
+        logging.basicConfig(
+            level=logging.INFO,
+            format="%(asctime)s [%(levelname)s] %(message)s",
+            handlers=[
+                logging.StreamHandler(sys.stdout),
+                logging.FileHandler(self.results_dir / "inference.log", mode="w", encoding="utf-8"),
+            ],
+            force=True
+        )
 
         # Paths (Resolved relative to project root)
-        self.project_root = self.config_path.parent.parent
+        self.project_root = BASE_DIR
         
         # DYNAMIC PATHS
         self.model_path = self.models_dir / f"xgb_model_{self.mode}.json"
         
-        # We need the features file to get the input data.
-        # Following train_xgb.py logic, this is in 04_tabular_SU
-        self.feature_path = self.project_root / "04_tabular_SU" / f"su_features_{self.mode}.parquet"
+        base_tabular_dir = self.project_root / "04_tabular_SU"
+        self.feature_dir = path_utils.resolve_su_path(base_tabular_dir, su_name=self.su_name)
+        self.feature_path = self.feature_dir / f"su_features_{self.mode}.parquet"
 
         # Verify Environment
         if not self.model_path.exists():
@@ -176,12 +190,16 @@ class XGBoostInference:
         output_name = f"LSM_XGBoost_Prob_{self.mode.capitalize()}.tif" # e.g. LSM_XGBoost_Prob_Dynamic.tif
         logger.info(f">>> Generating Map: {output_name}")
 
-        if not SU_ID_RASTER.exists():
-            logger.critical(f"Reference Raster not found: {SU_ID_RASTER}")
+        # Resolve SU raster path dynamically
+        su_filename = self.dataset_config.get("grid", {}).get("files", {}).get("su_id")
+        su_raster_path = BASE_DIR / "02_aligned_grid" / su_filename
+
+        if not su_raster_path.exists():
+            logger.critical(f"Reference Raster not found: {su_raster_path}")
             sys.exit(1)
 
         # 1. Read Reference Grid
-        with rasterio.open(SU_ID_RASTER) as src:
+        with rasterio.open(su_raster_path) as src:
             grid = src.read(1)
             profile = src.profile
             nodata_val = src.nodata

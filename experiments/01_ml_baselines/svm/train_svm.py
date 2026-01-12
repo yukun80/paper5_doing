@@ -14,19 +14,13 @@ Description:
     Output Directory: experiments/01_ml_baselines/svm
 """
 
-import sys
-import json
 import joblib
-import numpy as np
 import pandas as pd
 from pathlib import Path
-from sklearn.svm import LinearSVC
-from sklearn.linear_model import SGDClassifier
-from sklearn.preprocessing import StandardScaler
-from sklearn.calibration import CalibratedClassifierCV
-from sklearn.pipeline import Pipeline
+import yaml
+import sys
 
-# Add project root to sys.path
+# Add project root to sys.path to allow imports
 BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent
 if str(BASE_DIR) not in sys.path:
     sys.path.append(str(BASE_DIR))
@@ -36,29 +30,34 @@ sys.path.append(str(BASE_DIR / "experiments" / "01_ml_baselines"))
 from ml_utils import (
     setup_logging,
     load_and_split_data,
-    undersample_majority_class,
     calculate_metrics,
     save_predictions
 )
+
+# Import custom path utility
+SCRIPTS_DIR = BASE_DIR / "scripts" / "00_common"
+sys.path.append(str(SCRIPTS_DIR))
+import path_utils
+
+from sklearn.svm import SVC
+from sklearn.preprocessing import StandardScaler
+from sklearn.pipeline import Pipeline
 
 # ==============================================================================
 # CONFIGURATION
 # ==============================================================================
 
-DATA_PATH = BASE_DIR / "04_tabular_SU" / "tabular_dataset.parquet"
-EXP_DIR = BASE_DIR / "experiments" / "01_ml_baselines" / "svm"
-MODELS_DIR = EXP_DIR / "models"
-MODELS_DIR.mkdir(parents=True, exist_ok=True)
+BASE_DATA_DIR = BASE_DIR / "04_tabular_SU"
+BASE_EXP_DIR = BASE_DIR / "experiments" / "01_ml_baselines" / "svm"
 
-# Model Params (SGD is much faster than SVC for >10k samples)
+# Model Params for SVC (RBF Kernel)
+# Note: SVC does not support 'loss', 'alpha', 'n_jobs' directly in the same way as SGDClassifier
 SVM_PARAMS = {
-    "loss": "hinge",        # Linear SVM
-    "penalty": "l2",
-    "alpha": 0.0001,
-    "max_iter": 1000,
-    "tol": 1e-3,
+    "kernel": "rbf",
+    "C": 1.0,
+    "probability": True, # Required for predict_proba
     "random_state": 42,
-    "n_jobs": -1
+    # "cache_size": 1000 # Optional optimization
 }
 
 # ==============================================================================
@@ -73,19 +72,26 @@ def main():
     args = parser.parse_args()
     mode = args.mode
 
-    # Dynamic Paths
-    data_filename = f"tabular_dataset_{mode}.parquet"
-    local_data_path = BASE_DIR / "04_tabular_SU" / data_filename
-
-    logger = setup_logging(f"SVM_Baseline_{mode}", EXP_DIR, f"train_svm_{mode}.log")
+    # 0. Resolve Config and Paths
+    config_path = BASE_DIR / "metadata" / f"dataset_config_{mode}.yaml"
+    with open(config_path, "r", encoding="utf-8") as f:
+        config = yaml.safe_load(f)
+        
+    data_dir = path_utils.resolve_su_path(BASE_DATA_DIR, config=config)
+    exp_dir = path_utils.resolve_su_path(BASE_EXP_DIR / "results", config=config)
+    models_dir = path_utils.resolve_su_path(BASE_EXP_DIR / "models", config=config)
+    
+    local_data_path = data_dir / f"tabular_dataset_{mode}.parquet"
+    
+    logger = setup_logging(f"SVM_Baseline_{mode}", exp_dir, log_file=f"train_svm_{mode}.log")
     logger.info("=" * 60)
-    logger.info(f">>> Program 6-ML: SVM (Linear SGD) Baseline | Mode: {mode}")
+    logger.info(f">>> Program 6-ML: Support Vector Machine | Mode: {mode}")
+    logger.info(f"Resolved Data Path: {local_data_path}")
     logger.info("=" * 60)
 
-    # 1. Load Data
+    # 1. Load & Split Data
     logger.info(f"Loading data from: {local_data_path.name}")
     try:
-        # load_and_split_data handles mask-based balanced sampling now
         df_train, df_test, feature_cols = load_and_split_data(local_data_path)
     except Exception as e:
         logger.critical(f"Data Load Failed: {e}")
@@ -100,62 +106,58 @@ def main():
     X_test = df_test[feature_cols].values
     y_test = df_test["label"].values
 
-    # 3. Build Pipeline
-    # Crucial: SVM requires Standardization
-    logger.info("Building Pipeline (Scaler -> LinearSVM)...")
-    
-    # Base SVM (Linear)
-    base_svm = SGDClassifier(**SVM_PARAMS)
-    
-    # Calibration wrapper (to get predict_proba)
-    # Method='sigmoid' is Platt Scaling
-    calibrated_svm = CalibratedClassifierCV(base_svm, method='sigmoid', cv=3)
-
-    pipeline = Pipeline([
-        ('scaler', StandardScaler()),
-        ('svm', calibrated_svm)
+    # 3. Train Model
+    logger.info("Training SVM (with RBF Kernel)...")
+    svm_pipeline = Pipeline([
+        ("scaler", StandardScaler()),
+        ("svm", SVC(**SVM_PARAMS))
     ])
-
-    # 4. Train
-    logger.info("Training...")
-    pipeline.fit(X_train, y_train)
+    svm_pipeline.fit(X_train, y_train)
 
     # Save Model
-    joblib.dump(pipeline, MODELS_DIR / f"svm_pipeline_{mode}.joblib")
-    logger.info("✔ Model saved.")
+    joblib.dump(svm_pipeline, models_dir / f"svm_final_{mode}.joblib")
+    logger.info(f"✔ Model saved to {models_dir}")
 
-    # 5. Evaluate
-    logger.info("Evaluating on Test Set...")
-    # predict_proba is now available via CalibratedClassifierCV
-    y_prob = pipeline.predict_proba(X_test)[:, 1]
-    
-    metrics = calculate_metrics(y_test, y_prob)
+    # 4. Evaluate
+    logger.info("Evaluating on Train & Test Set...")
+    # With probability=True, we can use predict_proba
+    y_prob_train = svm_pipeline.predict_proba(X_train)[:, 1]
+    y_prob_test = svm_pipeline.predict_proba(X_test)[:, 1]
+
+    metrics = calculate_metrics(y_test, y_prob_test)
     for k, v in metrics.items():
         logger.info(f"  {k:<15}: {v:.4f}")
 
-    # 6. Save Predictions
-    save_predictions(df_test, y_prob, EXP_DIR / f"svm_predictions_{mode}.csv")
-    logger.info("✔ Predictions saved.")
+    # 5. Save Results
+    df_train['prob'] = y_prob_train
+    df_train['split'] = 'train'
     
-    # 7. Coefficient Analysis (Feature Importance for Linear SVM)
-    # Access inner base estimator
-    try:
-        # Quick refit for importance (no calibration)
-        raw_svm = SGDClassifier(**SVM_PARAMS)
-        raw_svm.fit(StandardScaler().fit_transform(X_train), y_train)
-        
-        coefs = raw_svm.coef_[0]
-        df_imp = pd.DataFrame({
-            "feature": feature_cols,
-            "coefficient": np.abs(coefs), # Magnitude = Importance
-            "raw_coef": coefs
-        }).sort_values(by="coefficient", ascending=False)
-        
-        df_imp.to_csv(EXP_DIR / f"feature_coefficients_{mode}.csv", index=False)
-        logger.info("✔ Feature coefficients saved.")
-        
-    except Exception as e:
-        logger.warning(f"Could not extract coefficients: {e}")
+    df_test['prob'] = y_prob_test
+    df_test['split'] = 'test'
+    
+    df_full = pd.concat([df_train, df_test], axis=0)
+    
+    # Ensure su_id is a column
+    if df_full.index.name == 'su_id':
+        df_full = df_full.reset_index()
+    elif 'su_id' not in df_full.columns:
+         df_full['su_id'] = df_full.index
+
+    # Select only necessary columns
+    out_cols = ['su_id', 'label', 'prob', 'split']
+    df_full[out_cols].to_csv(exp_dir / f"svm_predictions_{mode}.csv", index=False)
+    
+    logger.info(f"✔ Full predictions saved to {exp_dir}")
+
+    # 7. Coefficient Analysis (Only valid for Linear Kernel, RBF has no simple coefs)
+    # Since we are using RBF, we skip coefficient extraction or use permutation importance if needed.
+    # For now, we just log that we are skipping it for RBF.
+    logger.info("Skipping feature coefficient extraction (Not applicable for RBF Kernel).")
+    
+    # Optional: If you really need importance, use permutation_importance
+    # from sklearn.inspection import permutation_importance
+    # r = permutation_importance(svm_pipeline, X_test, y_test, n_repeats=10, random_state=42)
+    # ... (Implementation omitted for speed)
 
 if __name__ == "__main__":
     main()

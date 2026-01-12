@@ -31,6 +31,13 @@ import torch.optim as optim
 from pathlib import Path
 from sklearn.metrics import roc_auc_score, average_precision_score, accuracy_score, f1_score
 
+import yaml
+
+# Import custom path utility
+SCRIPTS_DIR = Path(__file__).resolve().parent.parent.parent / "scripts" / "00_common"
+sys.path.append(str(SCRIPTS_DIR))
+import path_utils
+
 # Add current directory to path for local imports
 sys.path.append(str(Path(__file__).resolve().parent))
 from gcn_data_loader import GCNDataLoader
@@ -50,20 +57,14 @@ CONFIG = {
 
 # --- Paths ---
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
-OUTPUT_DIR = Path(__file__).resolve().parent / "results"
-TEMPLATE_RASTER = BASE_DIR / "02_aligned_grid" / "su_a50000_c03_geo.tif"
-MODEL_PATH = OUTPUT_DIR / "gcn_best_model.pth"
+BASE_OUTPUT_DIR = Path(__file__).resolve().parent / "results"
 
-# --- Logging ---
-OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(message)s",
-    handlers=[
-        logging.FileHandler(OUTPUT_DIR / "training_gcn.log", mode="w", encoding="utf-8"),
-        logging.StreamHandler(sys.stdout),
-    ],
-)
+# Placeholders resolved in main()
+OUTPUT_DIR = None
+TEMPLATE_RASTER = None
+MODEL_PATH = None
+
+# --- Global Logger (Will be reconfigured in main) ---
 logger = logging.getLogger(__name__)
 
 
@@ -146,19 +147,41 @@ def save_map_results(su_ids, probs_all, labels_all, split_mask, mode):
 def main():
     import argparse
     parser = argparse.ArgumentParser()
+    parser.add_argument("--config", type=Path, default=None)
     parser.add_argument("--mode", type=str, choices=["dynamic", "static"], default="dynamic")
     args = parser.parse_args()
     mode = args.mode
 
-    set_seed(CONFIG["seed"])
-    logger.info(f"Starting GCN Training on {CONFIG['device']} | Mode: {mode}")
-
-    # Update Model Path
-    global MODEL_PATH
+    # 0. Resolve Config and Paths
+    config_path = args.config if args.config else BASE_DIR / "metadata" / f"dataset_config_{mode}.yaml"
+    with open(config_path, "r", encoding="utf-8") as f:
+        config = yaml.safe_load(f)
+    
+    global OUTPUT_DIR, TEMPLATE_RASTER, MODEL_PATH
+    OUTPUT_DIR = path_utils.resolve_su_path(BASE_OUTPUT_DIR, config=config)
+    
+    su_filename = config.get("grid", {}).get("files", {}).get("su_id")
+    TEMPLATE_RASTER = BASE_DIR / "02_aligned_grid" / su_filename
     MODEL_PATH = OUTPUT_DIR / f"gcn_best_model_{mode}.pth"
 
+    # Reconfigure Logging to use dynamic dir
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s [%(levelname)s] %(message)s",
+        handlers=[
+            logging.FileHandler(OUTPUT_DIR / "training_gcn.log", mode="w", encoding="utf-8"),
+            logging.StreamHandler(sys.stdout),
+        ],
+        force=True # Allow reconfiguration
+    )
+
+    set_seed(CONFIG["seed"])
+    logger.info(f"Starting GCN Training on {CONFIG['device']} | Mode: {mode}")
+    logger.info(f"Resolved Output Directory: {OUTPUT_DIR}")
+
     # 1. Load Data
-    loader = GCNDataLoader(BASE_DIR, device=CONFIG["device"])
+    # Note: Need to update GCNDataLoader to support config_path
+    loader = GCNDataLoader(BASE_DIR, device=CONFIG["device"], config_path=config_path)
     data = loader.load(mode=mode)
 
     features = data["features"]

@@ -1,12 +1,13 @@
-2026-01-11 10:24:06,542 [INFO] >>> Starting Program 4: Graph Construction (Topology)
-2026-01-11 10:24:06,550 [INFO] Loading SU Grid: su_a50000_c03_geo.tif
-2026-01-11 10:24:07,156 [INFO] Scanning for spatial neighbors (Vectorized)...
-2026-01-11 10:24:10,283 [INFO] Detected 41250 unique adjacency boundaries.
-2026-01-11 10:24:13,369 [INFO] ----------------------------------------
-2026-01-11 10:24:13,369 [INFO] Graph Statistics (static):
-2026-01-11 10:24:13,369 [INFO]   Total Nodes (SUs): 8483
-2026-01-11 10:24:13,369 [INFO]   Total Edges      : 48918
-2026-01-11 10:24:13,369 [INFO]   Average Degree   : 5.77
-2026-01-11 10:24:13,369 [INFO] ----------------------------------------
-2026-01-11 10:24:13,421 [INFO] Saved graph edges to: E:\Document\paper_library\5th_paper_InSAR\datasets\05_graph_SU\edges_static.parquet
-2026-01-11 10:24:13,421 [INFO] Total Time: 6.88 seconds
+2026-01-12 19:22:03,695 [INFO] >>> Starting Program 4: Graph Construction (Topology)
+2026-01-12 19:22:03,704 [INFO] Resolved Output Directory: E:\Document\paper_library\5th_paper_InSAR\datasets\05_graph_SU\su_a500000_c06
+2026-01-12 19:22:03,704 [INFO] Loading SU Grid: su_a500000_c06.tif
+2026-01-12 19:22:04,278 [INFO] Scanning for spatial neighbors (Vectorized)...
+2026-01-12 19:22:07,682 [INFO] Detected 43865 unique adjacency boundaries.
+2026-01-12 19:22:10,937 [INFO] ----------------------------------------
+2026-01-12 19:22:10,937 [INFO] Graph Statistics (dynamic):
+2026-01-12 19:22:10,937 [INFO]   Total Nodes (SUs): 8888
+2026-01-12 19:22:10,938 [INFO]   Total Edges      : 51942
+2026-01-12 19:22:10,938 [INFO]   Average Degree   : 5.84
+2026-01-12 19:22:10,938 [INFO] ----------------------------------------
+2026-01-12 19:22:10,976 [INFO] Saved graph edges to: E:\Document\paper_library\5th_paper_InSAR\datasets\05_graph_SU\su_a500000_c06\edges_dynamic.parquet
+2026-01-12 19:22:10,976 [INFO] Total Time: 7.28 seconds

@@ -22,17 +22,20 @@ import rasterio
 import scipy.ndimage
 import yaml
 
+# Import custom path utility
+sys.path.append(str(Path(__file__).resolve().parent))
+import path_utils
+
 # ==============================================================================
 # CONFIGURATION & CONSTANTS
 # ==============================================================================
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 DEFAULT_CONFIG_PATH = BASE_DIR / "metadata" / "dataset_config_dynamic.yaml"
-OUTPUT_DIR = BASE_DIR / "04_tabular_SU"
+BASE_OUTPUT_DIR = BASE_DIR / "04_tabular_SU"
 LOG_DIR = BASE_DIR / "logs"
 
-# Ensure output directories exist
-OUTPUT_DIR.mkdir(exist_ok=True)
+# Ensure log directory exists
 LOG_DIR.mkdir(exist_ok=True)
 
 # Setup Logging
@@ -103,22 +106,36 @@ def main():
     args = parser.parse_args()
 
     mode = args.mode
-    logger.info(f"Mode: {mode} | Config: {args.config}")
-
-    # 2. Setup Mode-Specific Paths
-    stack_meta_path = BASE_DIR / "metadata" / f"stack_metadata_post_{mode}.json"
-    input_stack = BASE_DIR / "03_stacked_data" / f"Post_stack_{mode}.tif"
-    output_parquet = OUTPUT_DIR / f"su_features_{mode}.parquet"
-
-    # 3. Load Metadata
+    
+    # Load Config early to resolve paths
     config = load_config(args.config)
-    stack_meta = load_json(stack_meta_path)
+    
+    # 2. Resolve Dynamic Paths
+    output_dir = path_utils.resolve_su_path(BASE_OUTPUT_DIR, config=config)
+    output_parquet = output_dir / f"su_features_{mode}.parquet"
+    
+    logger.info(f"Resolved Output Directory: {output_dir}")
+
+    # 3. Establish Input Path (Stacked Raster)
+    # The stack is now also in an SU-specific subdirectory
+    stack_dir = path_utils.resolve_su_path(BASE_DIR / "03_stacked_data", config=config)
+    stack_path = stack_dir / f"Post_stack_{mode}.tif"
+    meta_path = stack_dir / f"stack_metadata_post_{mode}.json"
+
+    # Define SU Path
     su_filename = get_su_filename(config)
     su_path = BASE_DIR / "02_aligned_grid" / su_filename
 
     if not su_path.exists():
         logger.critical(f"SU ID file not found: {su_path}")
         sys.exit(1)
+        
+    if not stack_path.exists():
+        logger.critical(f"Stacked raster not found: {stack_path}")
+        sys.exit(1)
+
+    # Load Stack Metadata
+    stack_meta = load_json(meta_path)
 
     # 4. Load Reference SU Grid (Index Map)
     logger.info(f"Loading SU Grid: {su_path.name}")
@@ -134,9 +151,9 @@ def main():
     results_df.index.name = "su_id"
 
     # 5. Band-wise Processing Loop
-    logger.info(f"--- Starting Extraction from {input_stack.name} ---")
+    logger.info(f"--- Starting Extraction from {stack_path.name} ---")
 
-    with rasterio.open(input_stack) as src:
+    with rasterio.open(stack_path) as src:
         if src.count != len(stack_meta):
             logger.warning(f"Mismatch: Stack has {src.count} bands, but metadata has {len(stack_meta)} entries.")
 

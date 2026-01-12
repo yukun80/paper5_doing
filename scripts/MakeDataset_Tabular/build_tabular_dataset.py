@@ -6,12 +6,21 @@ import numpy as np
 import pandas as pd
 from pathlib import Path
 
+# Import custom path utility
+import sys
+COMMON_UTILS_DIR = Path(__file__).resolve().parent.parent / "00_common"
+sys.path.append(str(COMMON_UTILS_DIR))
+import path_utils
+
 # --- Configuration ---
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
-DATA_DIR = BASE_DIR / "04_tabular_SU"
+BASE_DATA_DIR = BASE_DIR / "04_tabular_SU"
 METADATA_DIR = BASE_DIR / "metadata"
 DEFAULT_CONFIG_PATH = METADATA_DIR / "dataset_config_dynamic.yaml"
-OUTPUT_PATH = DATA_DIR / "tabular_dataset.parquet"
+
+# Output and input paths will be resolved dynamically in main()
+DATA_DIR = None
+OUTPUT_PATH = None
 
 """
 python scripts/MakeDataset_RF/build_tabular_dataset.py --config metadata/dataset_config_dynamic.yaml
@@ -32,11 +41,17 @@ def main():
     parser.add_argument("--mode", type=str, choices=["dynamic", "static"], default="dynamic", help="Experiment mode")
     args = parser.parse_args()
     
-    # Update Output Path
-    global OUTPUT_PATH
+    # 1. Load Config early
+    config = load_config(args.config)
+    
+    # 2. Update Paths dynamically
+    global DATA_DIR, OUTPUT_PATH
+    DATA_DIR = path_utils.resolve_su_path(BASE_DATA_DIR, config=config)
     OUTPUT_PATH = DATA_DIR / f"tabular_dataset_{args.mode}.parquet"
+    
+    print(f"[Info] Resolved Data Directory: {DATA_DIR}")
 
-    # 1. Load Data
+    # 3. Load Data
     features_path = DATA_DIR / f"su_features_{args.mode}.parquet"
     labels_path = DATA_DIR / f"su_labels_{args.mode}.parquet"
 
@@ -60,10 +75,13 @@ def main():
     # Locate InSAR File
     grid_dir = BASE_DIR / "02_aligned_grid"
     insar_files = list(grid_dir.glob("InSAR_desc_*nodata.tif"))
-    su_grid_path = grid_dir / "su_a50000_c03_geo.tif"
+    
+    # DYNAMICALLY get SU grid filename from config
+    su_filename = config.get("grid", {}).get("files", {}).get("su_id")
+    su_grid_path = grid_dir / su_filename
 
     if not insar_files or not su_grid_path.exists():
-        print(f"[Warning] InSAR file or SU Grid not found. Skipping InSAR filtering. (Files: {insar_files})")
+        print(f"[Warning] InSAR file or SU Grid not found. Skipping InSAR filtering. (Grid: {su_filename})")
         df["is_stable"] = True # Default to all stable if data missing
     else:
         insar_path = insar_files[0]
@@ -149,33 +167,53 @@ def main():
         print(f"[Info] Renaming {len(new_cols)} columns with role prefixes...")
         df.rename(columns=new_cols, inplace=True)
 
-    # 3. Deterministic Train/Test Split (Based on SU ID)
+    # 3. Deterministic Train/Test Split (Percentage Based)
     # Requirement:
-    #   - Test Set: SU_ID < 4100
-    #   - Train Set: SU_ID >= 4100
+    #   - Test Set: First 40% of sorted SU_IDs
+    #   - Train Set: Remaining 60%
     
-    print(f"[Info] Performing Deterministic Split (Threshold: SU_ID 4100)...")
+    print(f"[Info] Performing Deterministic Split (First 40% Test, Last 60% Train)...")
     
-    # Ensure index is treated as SU_ID (integer)
-    # Note: Parquet index might be named or unnamed.
-    # If the index is the SU_ID, we use it directly.
+    # Ensure index is treated as SU_ID (integer) and sorted
+    su_ids = df.index.to_series().astype(int).sort_values()
     
-    su_ids = df.index.to_series().astype(int)
+    # Calculate Split Index
+    n_total = len(su_ids)
+    split_idx = int(n_total * 0.40) # 40% mark
     
+    # Determine Threshold SU_ID (The ID at the cut-off point)
+    # IDs are 1-based usually, but we use the sorted array to find the value.
+    # The split_idx points to the first element of the TRAIN set (if we slice [:split_idx] for test)
+    # or the first element AFTER test set.
+    
+    # Let's verify:
+    # [0, 1, ..., split_idx-1] -> Test (Length = split_idx)
+    # [split_idx, ..., n-1]    -> Train
+    
+    if split_idx >= n_total:
+         raise ValueError("Dataset too small for 40% split.")
+         
+    split_threshold_id = su_ids.iloc[split_idx]
+    
+    print(f"  - Total SUs: {n_total}")
+    print(f"  - Split Index: {split_idx} (Top 40%)")
+    print(f"  - Dynamic Split Threshold SU_ID: < {split_threshold_id}")
+
     # Create 'split' column
     # Initialize with 'train'
     df["split"] = "train"
     
-    # Mark test set
-    test_mask = su_ids < 4100
+    # Mark test set (IDs strictly less than the threshold value found at 40% mark)
+    # Note: Since su_ids is sorted, using the value at split_idx as upper bound works.
+    test_mask = df.index < split_threshold_id
     df.loc[test_mask, "split"] = "test"
     
     train_count = (df["split"] == "train").sum()
     test_count = (df["split"] == "test").sum()
     
     print(f"[Success] Split Completed:")
-    print(f"  - Train (>= 4100): {train_count} samples")
-    print(f"  - Test  (< 4100) : {test_count} samples")
+    print(f"  - Train (>= {split_threshold_id}): {train_count} samples ({train_count/n_total:.1%})")
+    print(f"  - Test  (< {split_threshold_id}) : {test_count} samples ({test_count/n_total:.1%})")
 
     # 4. Balanced Sampling Mask for Training
     # We create a mask that selects all positives and an equal number of negatives from the TRAIN split.

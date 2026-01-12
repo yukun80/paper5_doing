@@ -26,17 +26,20 @@ import pandas as pd
 import rasterio
 import yaml
 
+# Import custom path utility
+sys.path.append(str(Path(__file__).resolve().parent))
+import path_utils
+
 # ==============================================================================
 # CONFIGURATION & CONSTANTS
 # ==============================================================================
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 DEFAULT_CONFIG_PATH = BASE_DIR / "metadata" / "dataset_config_dynamic.yaml"
-OUTPUT_DIR = BASE_DIR / "05_graph_SU"
+BASE_OUTPUT_DIR = BASE_DIR / "05_graph_SU"
 LOG_DIR = BASE_DIR / "logs"
 
-# Ensure output directory exists
-OUTPUT_DIR.mkdir(exist_ok=True)
+# Ensure output directory exists (Base log dir)
 LOG_DIR.mkdir(exist_ok=True)
 
 # Setup Logging
@@ -107,10 +110,14 @@ def main():
     args = parser.parse_args()
     
     mode = args.mode
-    output_parquet = OUTPUT_DIR / f"edges_{mode}.parquet"
-
+    
     # 2. Load Config
     config = load_config(args.config)
+    output_dir = path_utils.resolve_su_path(BASE_OUTPUT_DIR, config=config)
+    output_parquet = output_dir / f"edges_{mode}.parquet"
+    
+    logger.info(f"Resolved Output Directory: {output_dir}")
+
     su_filename = get_su_filename(config)
     su_path = BASE_DIR / "02_aligned_grid" / su_filename
 

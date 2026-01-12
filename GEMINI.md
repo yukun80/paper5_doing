@@ -6,84 +6,51 @@
 
 **Core Architecture:**
 *   **Paradigm:** Config-Driven Data Pipeline -> Common Foundation -> **Unified Tabular Master** -> Model Baselines & GNNExplainer.
+*   **Multi-Scale Support:** Fully decoupled data/result directories using SU-specific subfolders resolved via `path_utils.py`.
 *   **Key Model:** **GCN (Base Model)** + **GNNExplainer (Interpretation Engine)**.
-*   **Tech Stack:** Python, Rasterio, Geopandas, Scikit-learn, PyTorch (Geometric), XGBoost, Tensorboard.
 
-## 2. Directory Structure & Standards
+## 2. Directory Structure & Standards (Updated)
 
 ### Root Directory: `E:\Document\paper_library\5th_paper_InSAR\datasets`
 
-*   **`02_aligned_grid/`**: **[Input Source]**
-    *   Aligned rasters (10m Resolution).
-    *   **Dynamic Factors:** `S2_dNDVI...`, `S2_dNBR...`, `S2_dMNDWI...` (Difference Indices).
-    *   **Correction Source:** `InSAR_desc_2024_2025...` (Deformation Velocity).
-*   **`04_tabular_SU/`**: **[Processing Output]**
-    *   `su_features.parquet`: Raw statistical features.
-    *   `tabular_dataset.parquet`: **[Unified Master]** Merged features, labels, and Deterministic Splits.
-*   **`05_graph_SU/`**: **[Processing Output]**
-    *   `edges.parquet`: Adjacency list.
-*   **`metadata/`**:
-    *   `dataset_config.yaml`: Global dataset configuration.
+*   **`02_aligned_grid/`**: **[Input Source]** (Aligned rasters, 10m).
+*   **`03_stacked_data/<SU_NAME>/`**: SU-specific multi-band stacks.
+*   **`04_tabular_SU/<SU_NAME>/`**: SU-specific features, labels, and `tabular_dataset.parquet`.
+*   **`05_graph_SU/<SU_NAME>/`**: SU-specific graph edges.
 *   **`experiments/`**:
-    *   `01_ml_baselines/`: RF, SVM, XGBoost.
-    *   `02_dl_gcn/`: Standard GCN Baseline.
-    *   `GNNExplainer/`: **[Core Innovation]**
-        *   `train_landslide.py`: Main GCN training.
-        *   `inference_gcn.py`: Full-region probability mapping.
-        *   `explain_landslide.py`: Feature/Edge Mask extraction for scientific interpretation.
-        *   `insar_correction.py`: Post-processing using InSAR logic.
-        *   `adapter.py`: Bridge between Parquet/NetworkX and Dense Tensors.
-*   **`scripts/`**:
-    *   `00_common/`: Shared raster/graph processing.
-    *   `MakeDataset_Tabular/`: Builds the unified tabular dataset.
+    *   `01_ml_baselines/`: RF, SVM, XGBoost results saved in `<MODEL>/results/<SU_NAME>/` or `inference_results/<SU_NAME>/`.
+    *   `02_dl_gcn/`: GCN Baseline results in `results/<SU_NAME>/`.
+    *   `GNNExplainer/`: Checkpoints, Inference, and Explanations in SU-specific subfolders.
+*   **`scripts/00_common/path_utils.py`**: Centralized path resolver for all scripts.
 
-## 3. Workflow & Pipeline (Status: GNNExplainer Active)
+## 3. Workflow & Pipeline (Status: Multi-Scale Framework Ready)
 
-### Phase 0: Common Foundation (Completed)
-1.  **Raster Stacking**: `10_build_raster_stack.py`
-2.  **Feature Extraction**: `20_extract_su_features.py`
-3.  **Labeling**: `30_generate_labels.py`
-4.  **Graph Topology**: `40_build_graph.py`
+### Phase 0: Preprocessing (SU-Agnostic)
+*   Standardized scripts 10-40 to auto-generate SU-specific subdirectories.
+*   Fixed `20_extract_su_features.py` variable scope and metadata loading bugs.
 
-### Phase 1: Unified Dataset (Refactored)
-5.  **Tabular Master Builder**: `scripts/MakeDataset_Tabular/build_tabular_dataset.py`
-    *   Output: `tabular_dataset.parquet`.
+### Phase 1: Unified Dataset (Percentage-Based Split)
+*   **Dynamic Split**: Replaced hardcoded threshold with **40% Test / 60% Train** split based on sorted SU IDs.
+*   **Physical Integrity**: Updated `ml_utils.py` to exclude InSAR columns (`is_stable`, `mean_vel`) from training features to prevent data leakage.
 
-### Phase 2: Baselines & Static Bias Verification
-6.  **ML Pipelines**: RF, SVM, and XGBoost scripts in `experiments/01_ml_baselines/`.
-    *   **Verification**: Static Bias Confirmed (71.27% Static Importance).
-
-### Phase 3: GNNExplainer & Physics Correction (Active)
-7.  **Training**: `experiments/GNNExplainer/train_landslide.py`
-    *   Trains a `GcnEncoderNode` compatible with the explainer.
-8.  **Inference**: `experiments/GNNExplainer/inference_gcn.py`
-    *   Generates `LSM_GCN_Raw_Prob.tif`.
-9.  **Explanation**: `experiments/GNNExplainer/explain_landslide.py`
-    *   Optimizes masks for High-Risk nodes to reveal Dynamic Factor contribution.
-10. **Correction**: `experiments/GNNExplainer/insar_correction.py`
-    *   Logic: `Final_Risk = max(Model_Prob, InSAR_High_Deformation)`.
+### Phase 2: Baselines & Comparison
+*   **SVM Upgrade**: Switched to RBF Kernel with probability calibration; fixed parameter incompatibility errors.
+*   **Inference Optimization**: All ML/DL inference scripts now generate GeoTIFFs using config-driven SU rasters and dynamic output paths.
+*   **Efficiency**: Created `run_models_only_*.bat` to bypass time-consuming preprocessing when iterating on models.
 
 ## 4. Development Conventions
-*   **Data Split**: Strict deterministic split (SU_ID 4100).
-*   **Model Input**: InSAR is **NOT** an input feature; it is only used for post-correction.
-*   **Artifacts**: All experiments must save outputs to dedicated subdirectories (`results/`, `models/`, `logs/`) to avoid root directory clutter.
+*   **Isolation**: NEVER save results directly in the root output folders. Always use `path_utils.resolve_su_path`.
+*   **Feature Consistency**: Use `static_env_` and `dynamic_forcing_` prefixes for feature selection; ensure InSAR data remains as a "constraint" only.
+*   **Naming**: Standardized probability column name as `prob` across all CSVs.
 
 ## 5. Recent "Memories" & Decisions
-*   **2026-01-10: Advanced Collinearity Analysis & Visualization**:
-    *   **Modular Analyzer**: Implemented `collinearity_analyzer.py` with Config-Driven logic and smart column matching (handling `static_env_` prefixes and `_mean` suffixes).
-    *   **Feature Optimization**: Replaced `TRI` with `Aspect` in both Static/Dynamic configs to resolve severe multicollinearity with `Slope`.
-    *   **High-Fidelity Viz**: 
-        *   `plot_correlation_matrix.py`: Full Pearson matrix with tilted labels and perfectly aligned colorbar height.
-        *   `plot_vif_tol_combo.py`: Dual-axis (VIF Bars + TOL Line) combo chart with multi-tier risk coloring (10/20/30) and offset-axis layout to prevent legend overlap.
-    *   **Aesthetics**: Adhered to "Academic Minimalism" by removing figure titles and streamlining legends for publication.
-*   **2026-01-10: Pipeline Finalization & Stabilization**:
-    *   **Solved IndexError/RuntimeError in GNNExplainer**: Fixed the loss function by passing full subgraph prediction labels, enabling proper Laplacian regularization.
-    *   **Code Quality**: Eliminated PyTorch UserWarnings by using recommended tensor construction patterns (`as_tensor`, `clone().detach()`). Fixed `IndentationError` in `explain.py`.
-    *   **Scientific Improvement**: Implemented **InSAR-guided Negative Sampling** in `build_tabular_dataset.py`. Negative samples (Non-landslides) are now physically verified for stability (Velocity < 0.02), ensuring a higher quality training signal.
-    *   **Output Management**: Standardized output structure across XGBoost and GNNExplainer (`results/`, `models/`, `logs/`).
-    *   **Cleanup**: Removed duplicate code blocks in `20_extract_su_features.py` and archived deprecated `CXGNN` components.
+*   **2026-01-11: Framework Robustness & Bug Squash**:
+    *   **Pathing**: Implemented `path_utils.py` to manage multi-scale SU data isolation.
+    *   **Data Unpacking**: Fixed `inference_gcn.py` regressions where `input_dim` and GPU transfers were missing.
+    *   **Logic Alignment**: Synchronized feature selection between `ml_utils.py` (exclusion-based) and inference scripts (prefix-based) by adding InSAR columns to the exclusion list.
+    *   **Code Cleanliness**: Refactored `inference_rf.py` to eliminate redundant function definitions and fix path resolution for feature metadata.
+*   **2026-01-11: Scale Transition**: Successfully switched study scale from 50k to 10k SU (`su_a10000_c01_10m.tif`) via configuration.
 
 ## 6. Pending Tasks
-*   **Final Run**: Execute `run_all_experiments_dynamic.bat` for final results.
-*   **Analysis**: Evaluate the "Feature Importance" shift between Dynamic and Static models.
-*   **Correction**: Verify InSAR units (m vs mm) in `insar_correction.py` if high-deformation zones are still 0.
+*   **Validation**: Execute the Models-Only pipeline for the 10k scale and verify ROC/PR metrics.
+*   **Explanation**: Analyze Feature Mask shifts in GNNExplainer for the new SU scale.

@@ -39,6 +39,11 @@ from ml_utils import (
     save_predictions
 )
 
+# Import custom path utility
+SCRIPTS_DIR = BASE_DIR / "scripts" / "00_common"
+sys.path.append(str(SCRIPTS_DIR))
+import path_utils
+
 # ==============================================================================
 # EXPERIMENT CLASS
 # ==============================================================================
@@ -58,10 +63,21 @@ class XGBoostBaseline:
         self.mode = mode
         self.config = self._load_config()
         
-        # Setup workspace
-        self.output_dir = Path(self.config["experiment"]["output_dir"])
+        # Load Dataset Config to resolve SU name
+        self.dataset_config_path = BASE_DIR / "metadata" / f"dataset_config_{self.mode}.yaml"
+        with open(self.dataset_config_path, "r", encoding="utf-8") as f:
+            self.dataset_config = yaml.safe_load(f)
+            
+        self.su_name = path_utils.get_su_name(self.dataset_config)
+        
+        # Setup workspace with SU subdirectories
+        base_output_dir = Path(self.config["experiment"]["output_dir"])
+        self.output_dir = path_utils.resolve_su_path(base_output_dir, su_name=self.su_name)
+        
+        # Avoid double resolution: output_dir is already specific to SU
         self.results_dir = self.output_dir / "results"
         self.models_dir = self.output_dir / "models"
+        
         self.results_dir.mkdir(parents=True, exist_ok=True)
         self.models_dir.mkdir(parents=True, exist_ok=True)
         
@@ -88,23 +104,18 @@ class XGBoostBaseline:
         """
         self.logger.info(">>> Loading Data...")
         
-        # Paths from config (Relative to project root)
-        project_root = self.config_path.parent.parent
-        
-        # DYNAMIC OVERRIDE: Construct paths based on mode
-        # Original: 04_tabular_SU/su_features.parquet -> su_features_{mode}.parquet
-        # Original: 04_tabular_SU/tabular_dataset.parquet -> tabular_dataset_{mode}.parquet
+        # Resolve SU-specific data path
+        base_tabular_dir = BASE_DIR / "04_tabular_SU"
+        data_dir = path_utils.resolve_su_path(base_tabular_dir, su_name=self.su_name)
         
         feat_filename = f"su_features_{self.mode}.parquet"
         data_filename = f"tabular_dataset_{self.mode}.parquet"
         
-        # We assume the directory is fixed as 04_tabular_SU based on project standard
-        # taking the parent dir from the config path if needed, but safer to rely on project root
-        feat_path = project_root / "04_tabular_SU" / feat_filename
-        data_path = project_root / "04_tabular_SU" / data_filename
+        feat_path = data_dir / feat_filename
+        data_path = data_dir / data_filename
 
         if not feat_path.exists() or not data_path.exists():
-            self.logger.critical(f"Missing input files for mode '{self.mode}':\n  {feat_path}\n  {data_path}")
+            self.logger.critical(f"Missing input files in {data_dir} for mode '{self.mode}'")
             sys.exit(1)
 
         # 1. Load Parquet Files

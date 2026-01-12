@@ -3,7 +3,7 @@ Script: plot_vif_tol_combo.py
 Description: Generates a Dual-Axis Combo Chart (Bar + Line).
              Primary Axis (Bottom): VIF (Bar Chart).
              Secondary Axis (Top): TOL (Line Chart).
-python scripts/04_Fig/plot_vif_tol_combo.py
+python scripts/04_Fig/01_Feature_Analysis/plot_vif_tol_combo.py
 """
 
 import sys
@@ -117,7 +117,7 @@ def plot_experiment(exp_meta):
     # plt.title(...)
     
     # Save
-    out_file = Path(f"scripts/04_Fig/Fig_Collinearity_{name}_Combo.png")
+    out_file = Path(f"scripts/04_Fig/01_Feature_Analysis/output/Fig_Collinearity_{name}_Combo.png")
     plt.savefig(out_file, bbox_inches='tight')
     print(f"[Success] Saved: {out_file}")
     plt.close()
