@@ -2,39 +2,11 @@
 SETLOCAL EnableDelayedExpansion
 
 :: ==============================================================================
-:: InSAR-Gated GNNExplainer Full Pipeline Runner (Windows Batch Version)
+:: InSAR-Gated GNNExplainer Models-Only Runner (Windows Batch Version)
 :: CONFIGURATION: DYNAMIC (Post-fire)
+::
+:: SKIPS Data Processing (Phase 0 & 1). Starts from Model Training.
 :: ==============================================================================
-
-echo.
-echo ============================================================
-echo [PHASE 0] Raw Data Processing (Common Foundation)
-echo ============================================================
-echo 1. Building Raster Stack...
-python scripts/00_common/10_build_raster_stack.py --config metadata/dataset_config_dynamic.yaml --mode dynamic
-if %ERRORLEVEL% NEQ 0 (echo [ERROR] Failed in Raster Stack Builder && exit /b %ERRORLEVEL%)
-
-echo 2. Extracting Slope Unit Features...
-python scripts/00_common/20_extract_su_features.py --config metadata/dataset_config_dynamic.yaml --mode dynamic
-if %ERRORLEVEL% NEQ 0 (echo [ERROR] Failed in Feature Extraction && exit /b %ERRORLEVEL%)
-
-echo 3. Generating Labels...
-python scripts/00_common/30_generate_labels.py --config metadata/dataset_config_dynamic.yaml --mode dynamic
-if %ERRORLEVEL% NEQ 0 (echo [ERROR] Failed in Label Generation && exit /b %ERRORLEVEL%)
-
-echo 4. Building Graph Topology...
-python scripts/00_common/40_build_graph.py --config metadata/dataset_config_dynamic.yaml --mode dynamic
-if %ERRORLEVEL% NEQ 0 (echo [ERROR] Failed in Graph Builder && exit /b %ERRORLEVEL%)
-
-echo.
-echo ============================================================
-echo [PHASE 1] Data Standardization
-echo ============================================================
-echo Building Unified Tabular Dataset...
-python scripts/MakeDataset_Tabular/build_tabular_dataset.py --config metadata/dataset_config_dynamic.yaml --mode dynamic
-if %ERRORLEVEL% NEQ 0 (echo [ERROR] Failed in Tabular Dataset Builder && exit /b %ERRORLEVEL%)
-
-
 
 echo.
 echo ============================================================
@@ -42,8 +14,11 @@ echo [PHASE 2] Random Forest Pipeline
 echo ============================================================
 echo Training RF...
 python "experiments/01_ml_baselines/random forest/train_rf.py" --mode dynamic
+if %ERRORLEVEL% NEQ 0 (echo [ERROR] Failed in RF Training && exit /b %ERRORLEVEL%)
+
 echo Inference and Mapping RF...
 python "experiments/01_ml_baselines/random forest/inference_rf.py" --mode dynamic
+if %ERRORLEVEL% NEQ 0 (echo [ERROR] Failed in RF Inference && exit /b %ERRORLEVEL%)
 
 echo.
 echo ============================================================
@@ -51,8 +26,11 @@ echo [PHASE 3] SVM Pipeline
 echo ============================================================
 echo Training SVM...
 python experiments/01_ml_baselines/svm/train_svm.py --mode dynamic
+if %ERRORLEVEL% NEQ 0 (echo [ERROR] Failed in SVM Training && exit /b %ERRORLEVEL%)
+
 echo Inference and Mapping SVM...
 python experiments/01_ml_baselines/svm/inference_svm.py --mode dynamic
+if %ERRORLEVEL% NEQ 0 (echo [ERROR] Failed in SVM Inference && exit /b %ERRORLEVEL%)
 
 echo.
 echo ============================================================
@@ -62,8 +40,11 @@ python -c "import xgboost" 2>NUL
 if %ERRORLEVEL% EQU 0 (
     echo Training XGBoost...
     python "experiments/01_ml_baselines/xgboost/train_xgb.py" --mode dynamic
+    if %ERRORLEVEL% NEQ 0 (echo [ERROR] Failed in XGBoost Training && exit /b %ERRORLEVEL%)
+    
     echo Inference and Mapping XGBoost...
     python "experiments/01_ml_baselines/xgboost/inference_xgb.py" --mode dynamic
+    if %ERRORLEVEL% NEQ 0 (echo [ERROR] Failed in XGBoost Inference && exit /b %ERRORLEVEL%)
 ) else (
     echo [SKIP] XGBoost library not found. Skipping Phase 4.
 )
@@ -89,7 +70,7 @@ python experiments/GNNExplainer/inference_gcn.py --mode dynamic
 if %ERRORLEVEL% NEQ 0 (echo [ERROR] Failed in Inference && exit /b %ERRORLEVEL%)
 
 echo 3. Explaining High-Risk Nodes...
-python experiments/GNNExplainer/explain_landslide.py --mode dynamic --num-explain 50
+python experiments/GNNExplainer/explain_landslide.py --mode dynamic
 if %ERRORLEVEL% NEQ 0 (echo [ERROR] Failed in Explanation && exit /b %ERRORLEVEL%)
 
 echo 4. Applying InSAR Correction...
@@ -98,6 +79,14 @@ if %ERRORLEVEL% NEQ 0 (echo [ERROR] Failed in Correction && exit /b %ERRORLEVEL%
 
 echo.
 echo ============================================================
-echo [SUCCESS] All Phases Completed Successfully!
+echo [PHASE 7] Model Comparison
+echo ============================================================
+echo Generating ROC/PR Comparison Plots...
+python experiments/03_comparison/compare_models.py --mode dynamic
+if %ERRORLEVEL% NEQ 0 (echo [ERROR] Failed in Comparison && exit /b %ERRORLEVEL%)
+
+echo.
+echo ============================================================
+echo [SUCCESS] Models-Only Pipeline Completed Successfully!
 echo ============================================================
 pause

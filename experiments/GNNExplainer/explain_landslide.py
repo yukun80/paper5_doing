@@ -3,18 +3,18 @@ Module: explain_landslide.py
 Location: experiments/GNNExplainer/explain_landslide.py
 Description:
     GNNExplainer Interpretation Script for Landslide Susceptibility.
-    
-    This script loads the trained GCN model and applies the GNNExplainer algorithm
-    to specific Target Nodes (Slope Units). It uncovers the "Why" behind the predictions.
-    
-    Key Features:
-    -   Loads the best checkpoint from 'train_landslide.py'.
-    -   Selects High-Risk nodes (True Positives).
-    -   Optimizes Edge Masks and Feature Masks using Mutual Information maximization.
-    -   Exports Feature Masks to CSV for quantitative "Static vs Dynamic" analysis.
 
-Author: AI Assistant (Virgo Edition)
-Date: 2026-01-10
+    This script uncovers the "Why" behind the predictions of the GCN model trained 
+    by 'train_landslide.py'. It uses the 'GcnEncoderNode' architecture native to 
+    this framework.
+
+    Key Features:
+    -   Multi-Run Averaging (MRA) for mask stability.
+    -   Counterfactual Inference (CPD) to quantify absolute risk contribution.
+    -   Dynamic Sensitivity Index (DSI) calculation.
+    -   Zoning Classification (Static-Dominant vs Dynamic-Triggered).
+
+python experiments/GNNExplainer/explain_landslide.py --mode dynamic --num-explain 50
 """
 
 import sys
@@ -22,317 +22,370 @@ import os
 import logging
 import argparse
 import pickle
-import json
-from pathlib import Path
-
-import torch
 import numpy as np
 import pandas as pd
 import yaml
+from pathlib import Path
 
-# Add current directory to path
+import torch
+
+# ==============================================================================
+# PATH SETUP
+# ==============================================================================
 CURRENT_DIR = Path(__file__).resolve().parent
 sys.path.append(str(CURRENT_DIR))
 
-# Add script directory for gnn_viz_kit
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
-VIZ_KIT_DIR = BASE_DIR / "scripts" / "04_Fig"
-sys.path.append(str(VIZ_KIT_DIR))
-
-# Import GCN from the training module
-GCN_MODULE_PATH = BASE_DIR / "experiments" / "02_dl_gcn"
-if str(GCN_MODULE_PATH) not in sys.path:
-    sys.path.append(str(GCN_MODULE_PATH))
-
-try:
-    from gcn_model import GCN
-except ImportError:
-    # We will handle this inside main or just let it fail if not found
-    pass
-
-try:
-    from gnn_viz_kit.data_schema import ExplanationArtifact
-    HAS_VIZ_KIT = True
-except ImportError:
-    HAS_VIZ_KIT = False
+SCRIPTS_DIR = BASE_DIR / "scripts" / "00_common"
+sys.path.append(str(SCRIPTS_DIR))
 
 import models
 from explainer import explain
 from adapter import LandslideDataAdapter
-
-# Import custom path utility
-SCRIPTS_DIR = BASE_DIR / "scripts" / "00_common"
-sys.path.append(str(SCRIPTS_DIR))
 import path_utils
+from utils.structs import ExplanationArtifact
 
 # ==============================================================================
 # LOGGING SETUP
 # ==============================================================================
+LOG_DIR = CURRENT_DIR / "logs"
+LOG_DIR.mkdir(parents=True, exist_ok=True)
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
     handlers=[
-        logging.FileHandler(CURRENT_DIR / "logs" / "explanation.log", mode="w", encoding="utf-8"),
-        logging.StreamHandler(sys.stdout)
-    ]
+        logging.FileHandler(LOG_DIR / "explanation.log", mode="w", encoding="utf-8"),
+        logging.StreamHandler(sys.stdout),
+    ],
 )
 logger = logging.getLogger(__name__)
 
 # ==============================================================================
-# MODEL WRAPPER
-# ==============================================================================
-
-class GCNWrapper(torch.nn.Module):
-    """
-    Adapts the simple 2-layer GCN from experiments/02_dl_gcn to GNNExplainer's API.
-    Handles dense adjacency matrices during explanation.
-    """
-    def __init__(self, original_model):
-        super(GCNWrapper, self).__init__()
-        self.model = original_model
-        
-    def forward(self, x, adj, **kwargs):
-        # Flatten batch dim if present from GNNExplainer
-        if x.dim() == 3: x = x.squeeze(0)
-        if adj.dim() == 3: adj = adj.squeeze(0)
-        
-        # Layer 1
-        support1 = torch.mm(x, self.model.gc1.weight)
-        if adj.is_sparse:
-            out1 = torch.sparse.mm(adj, support1)
-        else:
-            out1 = torch.mm(adj, support1)
-             
-        if self.model.gc1.bias is not None:
-            out1 = out1 + self.model.gc1.bias
-        x1 = torch.nn.functional.relu(out1)
-        
-        # Layer 2
-        support2 = torch.mm(x1, self.model.gc2.weight)
-        if adj.is_sparse:
-            out2 = torch.sparse.mm(adj, support2)
-        else:
-            out2 = torch.mm(adj, support2)
-             
-        if self.model.gc2.bias is not None:
-            out2 = out2 + self.model.gc2.bias
-            
-        logits = torch.nn.functional.log_softmax(out2, dim=1)
-        
-        # Return (logits, None) to match GNNExplainer expected return (pred, att)
-        # We wrap logits in a batch dim for the explainer
-        return logits.unsqueeze(0), None
-
-    def load_state_dict(self, state_dict):
-        self.model.load_state_dict(state_dict)
-    
-    def eval(self):
-        self.model.eval()
-        
-    def cuda(self):
-        self.model.cuda()
-        return self
-
-# ==============================================================================
-# EXPLANATION PIPELINE
+# UTILITIES
 # ==============================================================================
 
 def resolve_paths(mode):
     config_path = BASE_DIR / "metadata" / f"dataset_config_{mode}.yaml"
+    if not config_path.exists():
+        logger.error(f"Config file not found: {config_path}")
+        sys.exit(1)
+        
     with open(config_path, "r", encoding="utf-8") as f:
         config = yaml.safe_load(f)
-    
+
     results_dir = path_utils.resolve_su_path(CURRENT_DIR / "results", config=config)
     checkpoint_dir = path_utils.resolve_su_path(CURRENT_DIR / "checkpoints", config=config)
+    
     return config_path, results_dir, checkpoint_dir
 
+def identify_dynamic_indices(feature_names):
+    """Identifies indices of dynamic features (starting with 'd')."""
+    indices = []
+    for i, name in enumerate(feature_names):
+        if name.lower().startswith("d") or name.lower().startswith("diff"):
+            indices.append(i)
+    return indices
+
+# ==============================================================================
+# MAIN PIPELINE
+# ==============================================================================
+
 def main(args):
-    # 0. Resolve Paths
+    # 0. Resolve Paths & Config
     config_path, results_dir, checkpoint_dir = resolve_paths(args.mode)
-    logger.info(f"Resolved Results Directory: {results_dir}")
+    logger.info(f"--- Starting GNNExplainer ({args.mode}) ---")
+    logger.info(f"Results Directory: {results_dir}")
 
     # 1. Load Data
     adapter = LandslideDataAdapter(base_dir=BASE_DIR, mode=args.mode, config_path=config_path)
     adapter.load_data()
     data = adapter.get_processed_data()
+    
     feature_names = data["feature_names"]
     adj = data["adj"]
     feat = data["feat"]
     label = data["label"]
     train_idx = data["train_idx"]
     test_idx = data["test_idx"]
+    
+    # Identify dynamic features for Counterfactual Analysis
+    dynamic_feat_indices = identify_dynamic_indices(feature_names)
+    logger.info(f"Identified {len(dynamic_feat_indices)} dynamic features: {[feature_names[i] for i in dynamic_feat_indices]}")
 
-    # 2. Load Checkpoint
-    train_results_base = BASE_DIR / "experiments" / "02_dl_gcn" / "results"
-    train_model_dir = train_results_base / results_dir.name
-    ckpt_path = train_model_dir / f"gcn_best_model_{args.mode}.pth"
+    input_dim = feat.size(2)
+    num_classes = 2
+
+    # 2. Initialize Model
+    model = models.GcnEncoderNode(
+        input_dim=input_dim,
+        hidden_dim=args.hidden_dim,
+        embedding_dim=args.output_dim,
+        label_dim=num_classes,
+        num_layers=args.num_layers,
+        bn=args.bn,
+        dropout=0.0,
+        args=args
+    )
+
+    if args.gpu and torch.cuda.is_available():
+        model = model.cuda()
+        adj = adj.cuda()
+        feat = feat.cuda()
+        label = label.cuda()
+    
+    # 3. Load Checkpoint
+    ckpt_filename = f"landslide_model_{args.mode}_best.pth.tar"
+    ckpt_path = checkpoint_dir / ckpt_filename
     
     if not ckpt_path.exists():
-        logger.warning(f"Model not found at {ckpt_path}. Checking local results...")
-        ckpt_path = results_dir / f"gcn_best_model_{args.mode}.pth"
-        
-    if not ckpt_path.exists():
-        logger.critical(f"Checkpoint not found at {ckpt_path}. Please run train_gcn.py first.")
+        logger.critical(f"Checkpoint not found at: {ckpt_path}")
         return
 
-    logger.info(f"Loading checkpoint: {ckpt_path}")
-    
     try:
-        # PyTorch 2.6+ compatibility
-        checkpoint = torch.load(ckpt_path, map_location='cuda' if args.gpu else 'cpu', weights_only=False)
-        if isinstance(checkpoint, dict) and "model_state" in checkpoint:
-            state_dict = checkpoint["model_state"]
-        else:
-            state_dict = checkpoint
+        checkpoint = torch.load(ckpt_path, map_location="cuda" if args.gpu and torch.cuda.is_available() else "cpu", weights_only=False)
+        model.load_state_dict(checkpoint["model_state"])
+        model.eval()
+        logger.info(f"Model loaded (Best AUC: {checkpoint.get('best_auc', 'N/A')}).")
     except Exception as e:
         logger.error(f"Failed to load checkpoint: {e}")
         return
 
-    # 3. Rebuild Model
-    input_dim = feat.size(2)
-    from gcn_model import GCN
-    raw_model = GCN(n_feat=input_dim, n_hidden=args.hidden_dim, n_class=2, dropout=0.0)
-    model = GCNWrapper(raw_model)
-    
-    try:
-        model.load_state_dict(state_dict)
-        logger.info("Successfully loaded state_dict into GCNWrapper.")
-    except RuntimeError as e:
-        logger.error(f"State dict mismatch. Expected {input_dim} features. Error: {e}")
-        return
-
-    if args.gpu: model = model.cuda()
-    model.eval()
-
-    # 4. Initialize Explainer
+    # 4. Generate Global Predictions
     with torch.no_grad():
-        if args.gpu:
-            logits, _ = model(feat.cuda(), adj.cuda())
-        else:
-            logits, _ = model(feat, adj)
-        pred = logits.argmax(dim=2).cpu() 
+        logits, _ = model(feat, adj)
+        # Assuming logits [1, N, 2] or [N, 2]
+        if logits.dim() == 3 and logits.size(0) == 1:
+            logits = logits[0]
         
+        probs = torch.softmax(logits, dim=1)
+        pred = logits.argmax(dim=1).cpu()
+        
+        # Store global probabilities for Counterfactual Reference
+        global_probs = probs[:, 1].cpu().numpy() # Probability of Landslide
+
+    # 5. Initialize GNNExplainer
     explainer_instance = explain.Explainer(
-        model=model, adj=adj, feat=feat, label=label, pred=pred,
-        train_idx=train_idx, args=args, print_training=True
+        model=model,
+        adj=adj,
+        feat=feat,
+        label=label,
+        pred=pred,
+        train_idx=train_idx,
+        args=args,
+        print_training=False
     )
-    
-    # 5. Select Target Nodes (True Positives in Test Set)
-    pred_labels = pred[0].numpy()
-    true_labels = label[0].numpy()
+
+    # 6. Select Target Nodes (TP + High Risk FN)
+    pred_labels = pred.numpy()
+    true_labels = label[0].cpu().numpy() if label.dim() == 2 else label.cpu().numpy()
     test_indices = np.array(test_idx)
+    
+    # TP: True Positive
     tp_mask = (true_labels[test_indices] == 1) & (pred_labels[test_indices] == 1)
-    tp_indices = test_indices[tp_mask]
-    
-    logger.info(f"Found {len(tp_indices)} True Positive high-risk nodes.")
-    targets = tp_indices[:args.num_explain]
-    
+    targets = test_indices[tp_mask]
+
+    if args.explain_all:
+        logger.info(f"Full Mode: Explaining {len(targets)} nodes.")
+    else:
+        sample_size = min(args.num_explain, len(targets))
+        if sample_size > 0:
+            targets = np.random.choice(targets, sample_size, replace=False)
+            logger.info(f"Sample Mode: Explaining {len(targets)} random nodes.")
+        else:
+            logger.warning("No targets found.")
+            return
+
     results = []
-    
-    for node_idx in targets:
-        logger.info(f"--- Explaining Node {node_idx} ---")
+    artifact_dir = results_dir / "artifacts"
+    artifact_dir.mkdir(parents=True, exist_ok=True)
+
+    # 7. Explanation Loop
+    for i, node_idx in enumerate(targets):
+        su_id_target = adapter.node_ids[node_idx]
+        
+        # --- A. Neighborhood Extraction ---
         node_idx_new, sub_adj, sub_feat, sub_label, neighbors = explainer_instance.extract_neighborhood(node_idx)
         
         sub_adj_t = torch.as_tensor(sub_adj, dtype=torch.float).unsqueeze(0)
         sub_feat_t = torch.as_tensor(sub_feat, dtype=torch.float).unsqueeze(0)
         sub_label_t = torch.as_tensor(sub_label, dtype=torch.long).unsqueeze(0)
         
-        if args.gpu:
-            sub_adj_t, sub_feat_t, sub_label_t = sub_adj_t.cuda(), sub_feat_t.cuda(), sub_label_t.cuda()
+        if args.gpu and torch.cuda.is_available():
+            sub_adj_t = sub_adj_t.cuda()
+            sub_feat_t = sub_feat_t.cuda()
+            sub_label_t = sub_label_t.cuda()
 
-        explainer_module = explain.ExplainModule(
-            adj=sub_adj_t, x=sub_feat_t, model=model, label=sub_label_t, args=args
-        )
-        if args.gpu: explainer_module = explainer_module.cuda()
-            
-        explainer_module.train()
-        optimizer = torch.optim.Adam([explainer_module.mask, explainer_module.feat_mask], lr=0.1)
+        # --- B. Counterfactual Inference (CPD) ---
+        # Calculate prob drop when dynamic features are zeroed out
+        orig_prob = float(global_probs[node_idx])
         
-        for epoch in range(args.num_epochs):
-            explainer_module.zero_grad()
-            optimizer.zero_grad()
-            ypred, _ = explainer_module(0, unconstrained=False)
-            
-            sub_pred_labels = pred_labels[neighbors]
-            sub_pred_labels_t = torch.tensor(sub_pred_labels, dtype=torch.long)
-            if args.gpu: sub_pred_labels_t = sub_pred_labels_t.cuda()
-            
-            loss = explainer_module.loss(ypred, sub_pred_labels_t, node_idx_new, epoch)
-            loss.backward()
-            optimizer.step()
-            
-        # Extract Results
-        feat_mask = explainer_module.feat_mask.detach().sigmoid().cpu().numpy()
-        masked_adj = explainer_module.mask.detach().sigmoid().cpu().numpy()
+        # Clone features and zero out dynamic columns
+        sub_feat_cf = sub_feat_t.clone()
+        if dynamic_feat_indices:
+            sub_feat_cf[:, :, dynamic_feat_indices] = 0.0 # Zeroing dynamic factors
         
-        local_to_su_id = {i: adapter.node_ids[global_idx] for i, global_idx in enumerate(neighbors)}
+        with torch.no_grad():
+            logits_cf, _ = model(sub_feat_cf, sub_adj_t)
+            probs_cf = torch.softmax(logits_cf, dim=2)
+            # node_idx_new is the index of target in subgraph
+            cf_prob = float(probs_cf[0, node_idx_new, 1].cpu().item())
+        
+        cpd = orig_prob - cf_prob # Counterfactual Probability Drop
+        
+        # --- C. Multi-Run Mask Optimization ---
+        feat_mask_acc = None
+        masked_adj_acc = None
+        
+        for run_i in range(args.num_runs):
+            explainer_module = explain.ExplainModule(
+                adj=sub_adj_t, 
+                x=sub_feat_t, 
+                model=model, 
+                label=sub_label_t, 
+                args=args
+            )
+            if args.gpu and torch.cuda.is_available():
+                explainer_module = explainer_module.cuda()
+
+            explainer_module.train()
+            optimizer = torch.optim.Adam([explainer_module.mask, explainer_module.feat_mask], lr=args.lr)
+
+            for epoch in range(args.num_epochs):
+                explainer_module.zero_grad()
+                optimizer.zero_grad()
+                ypred, _ = explainer_module(0, unconstrained=False)
+                sub_pred_labels = pred_labels[neighbors]
+                sub_pred_labels_t = torch.tensor(sub_pred_labels, dtype=torch.long)
+                if args.gpu and torch.cuda.is_available():
+                    sub_pred_labels_t = sub_pred_labels_t.cuda()
+                loss = explainer_module.loss(ypred, sub_pred_labels_t, node_idx_new, epoch)
+                loss.backward()
+                optimizer.step()
+
+            curr_feat_mask = explainer_module.feat_mask.detach().sigmoid().cpu().numpy()
+            curr_adj_mask = explainer_module.mask.detach().sigmoid().cpu().numpy()
+
+            if feat_mask_acc is None:
+                feat_mask_acc = curr_feat_mask
+                masked_adj_acc = curr_adj_mask
+            else:
+                feat_mask_acc += curr_feat_mask
+                masked_adj_acc += curr_adj_mask
+
+        feat_mask = feat_mask_acc / args.num_runs
+        masked_adj = masked_adj_acc / args.num_runs
+        
+        # --- D. Calculate DSI (Dynamic Sensitivity Index) ---
+        sum_total_mask = np.sum(feat_mask)
+        sum_dynamic_mask = np.sum(feat_mask[dynamic_feat_indices]) if dynamic_feat_indices else 0.0
+        dsi = sum_dynamic_mask / (sum_total_mask + 1e-9)
+
+        # --- E. Determine Zoning Class ---
+        # Classification Logic
+        # Static-Dominant: High Risk, Low DSI, Low CPD (Fire didn't matter)
+        # Dynamic-Triggered: High Risk, Significant CPD (Fire pushed it over edge)
+        zone_class = "Unknown"
+        if orig_prob > 0.5:
+            if cpd > 0.1 or dsi > 0.15: # Thresholds can be tuned
+                zone_class = "Dynamic-Triggered"
+            else:
+                zone_class = "Static-Dominant"
+        
+        # --- F. Save Results ---
+        result_row = {
+            "su_id": su_id_target,
+            "pred_prob": orig_prob,
+            "pred_prob_cf": cf_prob,
+            "cpd": cpd,
+            "dsi": dsi,
+            "zone_class": zone_class,
+            **dict(zip(feature_names, feat_mask))
+        }
+        results.append(result_row)
+
+        # Save detailed artifact
+        local_to_su_id = {local_i: adapter.node_ids[global_idx] for local_i, global_idx in enumerate(neighbors)}
         edge_weights = {}
         rows, cols = np.where(masked_adj > 0.05)
         for r, c in zip(rows, cols):
             edge_weights[(local_to_su_id[r], local_to_su_id[c])] = float(masked_adj[r, c])
-
-        node_attributes = {}
-        dnbr_idx = next((i for i, n in enumerate(feature_names) if "dnbr" in n.lower()), -1)
-        slope_idx = next((i for i, n in enumerate(feature_names) if "slope" in n.lower()), -1)
-        sub_feat_cpu = sub_feat_t.squeeze(0).cpu().numpy()
         
-        for i, global_idx in enumerate(neighbors):
-            su_id = local_to_su_id[i]
-            attrs = {}
-            if dnbr_idx != -1: attrs['dNBR'] = float(sub_feat_cpu[i, dnbr_idx])
-            if slope_idx != -1: attrs['Slope'] = float(sub_feat_cpu[i, slope_idx])
+        # Node attrs for visualization
+        node_attributes = {}
+        sub_feat_cpu = sub_feat_t.squeeze(0).cpu().numpy()
+        for local_i, global_idx in enumerate(neighbors):
+            su_id = local_to_su_id[local_i]
+            attrs = {name: float(sub_feat_cpu[local_i, idx]) for idx, name in enumerate(feature_names)}
             node_attributes[su_id] = attrs
 
-        su_id_target = adapter.node_ids[node_idx]
-        results.append({"su_id": su_id_target, **dict(zip(feature_names, feat_mask))})
+        artifact = ExplanationArtifact(
+            su_id=su_id_target,
+            node_idx=node_idx,
+            dataset_split="test",
+            prediction_prob=orig_prob,
+            true_label=int(true_labels[node_idx]),
+            neighbor_indices=[local_to_su_id[i] for i in range(len(neighbors))],
+            edge_weights=edge_weights,
+            feature_mask=feat_mask,
+            feature_names=feature_names,
+            node_attributes=node_attributes,
+        )
+        # Inject extra metrics into artifact for specialized viz
+        artifact.extra_metrics = {"cpd": cpd, "dsi": dsi, "zone_class": zone_class}
         
-        if HAS_VIZ_KIT:
-            artifact = ExplanationArtifact(
-                su_id=su_id_target, node_idx=node_idx, dataset_split='test',
-                prediction_prob=float(pred_labels[node_idx]), true_label=int(true_labels[node_idx]),
-                neighbor_indices=[local_to_su_id[i] for i in range(len(neighbors))],
-                edge_weights=edge_weights, feature_mask=feat_mask,
-                feature_names=feature_names, node_attributes=node_attributes
-            )
-            artifact_dir = results_dir / "artifacts"
-            artifact_dir.mkdir(exist_ok=True)
-            with open(artifact_dir / f"explanation_su_{su_id_target}.pkl", "wb") as f:
-                pickle.dump(artifact, f)
-        
-        logger.info(f"Node {node_idx} (SU {su_id_target}) Explanation Done.")
+        with open(artifact_dir / f"explanation_su_{su_id_target}.pkl", "wb") as f:
+            pickle.dump(artifact, f)
+            
+        if i % 10 == 0:
+            logger.info(f"Processed {i+1} nodes...")
 
-    if not results: return
-    df_res = pd.DataFrame(results)
-    out_path = results_dir / f"feature_importance_{args.mode}.csv"
-    df_res.to_csv(out_path, index=False)
-    logger.info(f"Feature importance saved to: {out_path}")
+    # 8. Save Global CSV
+    if results:
+        df_res = pd.DataFrame(results)
+        out_path = results_dir / f"explanation_summary_{args.mode}.csv"
+        df_res.to_csv(out_path, index=False)
+        logger.info(f"Summary saved to: {out_path}")
+        
+        # Basic stats
+        logger.info("\n--- Zoning Distribution ---")
+        logger.info(df_res["zone_class"].value_counts())
+        logger.info(f"Mean DSI: {df_res['dsi'].mean():.4f}")
+        logger.info(f"Mean CPD: {df_res['cpd'].mean():.4f}")
 
 # ==============================================================================
-# ENTRY POINT
+# CLI
 # ==============================================================================
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--mode", type=str, default="dynamic")
-    parser.add_argument("--num-explain", type=int, default=10)
+    parser.add_argument("--explain-all", action="store_true")
+    parser.add_argument("--num-explain", type=int, default=50) # Increased default
     parser.add_argument("--num-epochs", type=int, default=100)
-    parser.add_argument("--gpu", action="store_true", default=True)
+    parser.add_argument("--num-runs", type=int, default=5)
+    parser.add_argument("--lr", type=float, default=0.01)
+    
+    # Model Args
     parser.add_argument("--hidden-dim", type=int, default=64)
     parser.add_argument("--output-dim", type=int, default=64)
-    parser.add_argument("--num-gc-layers", type=int, default=2) 
+    parser.add_argument("--num-layers", type=int, default=3)
     parser.add_argument("--bn", action="store_true", default=False)
+    parser.add_argument("--dropout", type=float, default=0.1)
+    parser.add_argument("--weight-decay", type=float, default=5e-4)
+    parser.add_argument("--gpu", action="store_true", default=True)
+    
+    # Dummy
     parser.add_argument("--method", type=str, default="base")
     parser.add_argument("--bias", action="store_true", default=True)
     parser.add_argument("--mask-act", type=str, default="sigmoid")
     parser.add_argument("--mask-bias", action="store_true", default=True)
-    parser.add_argument("--logdir", type=str, default="log")
+    parser.add_argument("--logdir", type=str, default="logs")
     parser.add_argument("--opt", type=str, default="adam")
     parser.add_argument("--opt-scheduler", type=str, default="none")
-    parser.add_argument("--lr", type=float, default=0.01)
     parser.add_argument("--opt-decay-step", type=int, default=50)
     parser.add_argument("--opt-decay-rate", type=float, default=0.5)
-    parser.add_argument("--weight-decay", type=float, default=0.0)
 
     args = parser.parse_args()
-    args.num_layers = args.num_gc_layers
+    args.num_gc_layers = args.num_layers
     main(args)

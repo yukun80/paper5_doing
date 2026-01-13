@@ -1,47 +1,47 @@
-2026-01-12 18:37:19,499 [INFO] >>> Starting Program 1: Dynamic Raster Stack Builder
-2026-01-12 18:37:19,502 [INFO] Using Configuration: metadata\dataset_config_dynamic.yaml (Mode: dynamic)
-2026-01-12 18:37:19,510 [INFO] Resolved Output Directory: E:\Document\paper_library\5th_paper_InSAR\datasets\03_stacked_data\su_a500000_c06
-2026-01-12 18:37:19,510 [INFO] Reference Grid: su_a500000_c06.tif
-2026-01-12 18:37:19,547 [INFO] Grid Size: 11494 x 16408
-2026-01-12 18:37:19,547 [INFO] CRS: EPSG:4326
-2026-01-12 18:37:19,547 [INFO] --- Validating Factors ---
-2026-01-12 18:37:19,571 [INFO] [OK] Slope
-2026-01-12 18:37:19,589 [INFO] [OK] Lithology
-2026-01-12 18:37:19,607 [INFO] [OK] Elevation
-2026-01-12 18:37:19,618 [INFO] [OK] Curvature
-2026-01-12 18:37:19,643 [INFO] [OK] TWI
-2026-01-12 18:37:19,669 [INFO] [OK] Aspect
-2026-01-12 18:37:19,699 [INFO] [OK] Soil
-2026-01-12 18:37:19,712 [INFO] [OK] LULC
-2026-01-12 18:37:19,726 [INFO] [OK] Dis2River
-2026-01-12 18:37:19,740 [INFO] [OK] Dis2Road
-2026-01-12 18:37:19,750 [INFO] [OK] Dis2Fault
-2026-01-12 18:37:19,753 [INFO] [OK] Precipitation
-2026-01-12 18:37:19,757 [INFO] [OK] NBR_Pre
-2026-01-12 18:37:19,759 [INFO] [OK] NDVI_Pre
-2026-01-12 18:37:19,762 [INFO] [OK] NDWI_Pre
-2026-01-12 18:37:19,765 [INFO] [OK] dNDVI
-2026-01-12 18:37:19,767 [INFO] [OK] dNBR
-2026-01-12 18:37:19,771 [INFO] [OK] dMNDWI
-2026-01-12 18:37:19,771 [INFO] --- Stacking 18 Layers ---
-2026-01-12 18:37:19,771 [INFO] Output: E:\Document\paper_library\5th_paper_InSAR\datasets\03_stacked_data\su_a500000_c06\Post_stack_dynamic.tif
-2026-01-12 18:37:19,775 [INFO] Writing Band 1: Slope
-2026-01-12 18:37:25,970 [INFO] Writing Band 2: Lithology
-2026-01-12 18:37:29,193 [INFO] Writing Band 3: Elevation
-2026-01-12 18:37:35,829 [INFO] Writing Band 4: Curvature
-2026-01-12 18:38:45,735 [INFO] Writing Band 5: TWI
-2026-01-12 18:39:36,959 [INFO] Writing Band 6: Aspect
-2026-01-12 18:39:44,605 [INFO] Writing Band 7: Soil
-2026-01-12 18:39:51,203 [INFO] Writing Band 8: LULC
-2026-01-12 18:40:33,815 [INFO] Writing Band 9: Dis2River
-2026-01-12 18:42:31,609 [INFO] Writing Band 10: Dis2Road
-2026-01-12 18:42:58,760 [INFO] Writing Band 11: Dis2Fault
-2026-01-12 18:44:01,592 [INFO] Writing Band 12: Precipitation
-2026-01-12 18:44:58,851 [INFO] Writing Band 13: NBR_Pre
-2026-01-12 18:46:29,394 [INFO] Writing Band 14: NDVI_Pre
-2026-01-12 18:48:02,044 [INFO] Writing Band 15: NDWI_Pre
-2026-01-12 18:48:06,475 [INFO] Writing Band 16: dNDVI
-2026-01-12 18:49:02,538 [INFO] Writing Band 17: dNBR
-2026-01-12 18:50:13,404 [INFO] Writing Band 18: dMNDWI
-2026-01-12 18:55:40,980 [INFO] Metadata written to: E:\Document\paper_library\5th_paper_InSAR\datasets\03_stacked_data\su_a500000_c06\stack_metadata_post_dynamic.json
-2026-01-12 18:55:40,980 [INFO] >>> Build Stack Completed Successfully.
+2026-01-12 19:48:48,559 [INFO] >>> Starting Program 1: Dynamic Raster Stack Builder
+2026-01-12 19:48:48,562 [INFO] Using Configuration: metadata\dataset_config_dynamic.yaml (Mode: dynamic)
+2026-01-12 19:48:48,571 [INFO] Resolved Output Directory: E:\Document\paper_library\5th_paper_InSAR\datasets\03_stacked_data\su_a10000_c01
+2026-01-12 19:48:48,571 [INFO] Reference Grid: su_a10000_c01.tif
+2026-01-12 19:48:48,584 [INFO] Grid Size: 11494 x 16408
+2026-01-12 19:48:48,585 [INFO] CRS: EPSG:4326
+2026-01-12 19:48:48,585 [INFO] --- Validating Factors ---
+2026-01-12 19:48:48,588 [INFO] [OK] Slope
+2026-01-12 19:48:48,590 [INFO] [OK] Lithology
+2026-01-12 19:48:48,592 [INFO] [OK] Elevation
+2026-01-12 19:48:48,596 [INFO] [OK] Curvature
+2026-01-12 19:48:48,598 [INFO] [OK] TWI
+2026-01-12 19:48:48,601 [INFO] [OK] Aspect
+2026-01-12 19:48:48,603 [INFO] [OK] Soil
+2026-01-12 19:48:48,605 [INFO] [OK] LULC
+2026-01-12 19:48:48,608 [INFO] [OK] Dis2River
+2026-01-12 19:48:48,611 [INFO] [OK] Dis2Road
+2026-01-12 19:48:48,614 [INFO] [OK] Dis2Fault
+2026-01-12 19:48:48,616 [INFO] [OK] Precipitation
+2026-01-12 19:48:48,619 [INFO] [OK] NBR_Pre
+2026-01-12 19:48:48,621 [INFO] [OK] NDVI_Pre
+2026-01-12 19:48:48,624 [INFO] [OK] NDWI_Pre
+2026-01-12 19:48:48,626 [INFO] [OK] dNDVI
+2026-01-12 19:48:48,629 [INFO] [OK] dNBR
+2026-01-12 19:48:48,631 [INFO] [OK] dMNDWI
+2026-01-12 19:48:48,632 [INFO] --- Stacking 18 Layers ---
+2026-01-12 19:48:48,632 [INFO] Output: E:\Document\paper_library\5th_paper_InSAR\datasets\03_stacked_data\su_a10000_c01\Post_stack_dynamic.tif
+2026-01-12 19:48:48,731 [INFO] Writing Band 1: Slope
+2026-01-12 19:48:51,050 [INFO] Writing Band 2: Lithology
+2026-01-12 19:48:52,899 [INFO] Writing Band 3: Elevation
+2026-01-12 19:48:58,243 [INFO] Writing Band 4: Curvature
+2026-01-12 19:49:46,882 [INFO] Writing Band 5: TWI
+2026-01-12 19:50:33,941 [INFO] Writing Band 6: Aspect
+2026-01-12 19:50:41,167 [INFO] Writing Band 7: Soil
+2026-01-12 19:50:47,194 [INFO] Writing Band 8: LULC
+2026-01-12 19:51:28,557 [INFO] Writing Band 9: Dis2River
+2026-01-12 19:53:22,318 [INFO] Writing Band 10: Dis2Road
+2026-01-12 19:53:41,082 [INFO] Writing Band 11: Dis2Fault
+2026-01-12 19:54:23,729 [INFO] Writing Band 12: Precipitation
+2026-01-12 19:55:02,357 [INFO] Writing Band 13: NBR_Pre
+2026-01-12 19:56:03,735 [INFO] Writing Band 14: NDVI_Pre
+2026-01-12 19:57:09,924 [INFO] Writing Band 15: NDWI_Pre
+2026-01-12 19:57:14,503 [INFO] Writing Band 16: dNDVI
+2026-01-12 19:57:53,388 [INFO] Writing Band 17: dNBR
+2026-01-12 19:58:41,256 [INFO] Writing Band 18: dMNDWI
+2026-01-12 20:02:19,813 [INFO] Metadata written to: E:\Document\paper_library\5th_paper_InSAR\datasets\03_stacked_data\su_a10000_c01\stack_metadata_post_dynamic.json
+2026-01-12 20:02:19,813 [INFO] >>> Build Stack Completed Successfully.
