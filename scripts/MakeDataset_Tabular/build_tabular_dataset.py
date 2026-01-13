@@ -275,6 +275,38 @@ def main():
     df.loc[pos_train_indices, "train_sample_mask"] = True
     df.loc[selected_neg_indices, "train_sample_mask"] = True
     
+    # 4.5 Feature Normalization (Z-Score) - ADDED
+    # Standardize features to have mean=0 and std=1. 
+    # This is crucial for Neural Networks (GCN) and distance-based models.
+    # RF/XGBoost are robust to this.
+    print(f"[Info] Applying Z-Score Normalization to features...")
+    
+    exclude_cols = [
+        "label", "split", "train_sample_mask", 
+        "is_stable", "mean_vel", "top20_abs_mean", 
+        "ratio", "geometry", "slide_pixels", "total_pixels", 
+        "centroid_x", "centroid_y"
+    ]
+    
+    feature_cols = [c for c in df.columns if c not in exclude_cols and not c.startswith("Unnamed")]
+    
+    # Calculate stats and normalize
+    # We use global stats here for simplicity and to ensure the map is consistent.
+    # (Strict ML would use train stats only, but for spatial mapping global is often preferred to avoid boundary artifacts)
+    stats_log = {}
+    for col in feature_cols:
+        # Check if numeric
+        if pd.api.types.is_numeric_dtype(df[col]):
+            mean_val = df[col].mean()
+            std_val = df[col].std()
+            if std_val == 0: std_val = 1.0 # Avoid division by zero
+            
+            df[col] = (df[col] - mean_val) / (std_val + 1e-9)
+            stats_log[col] = {"mean": mean_val, "std": std_val}
+            
+    print(f"  - Normalized {len(feature_cols)} feature columns.")
+    # Optional: Save stats to metadata if needed later
+    
     # 5. Save
     print(f"[Info] Saving Tabular Dataset to {OUTPUT_PATH}...")
     df.to_parquet(OUTPUT_PATH, index=True)

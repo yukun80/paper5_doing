@@ -29,8 +29,6 @@ from torch.autograd import Variable
 # Only necessary to rebuild the Chemistry example
 # from rdkit import Chem
 
-import utils.featgen as featgen
-
 use_cuda = torch.cuda.is_available()
 
 
@@ -560,78 +558,6 @@ def read_graphfile(datadir, dataname, max_nodes=None, edge_labels=False):
         # indexed from 0
         graphs.append(nx.relabel_nodes(G, mapping))
     return graphs
-
-
-def read_biosnap(datadir, edgelist_file, label_file, feat_file=None, concat=True):
-    """ Read data from BioSnap
-
-    Returns:
-        List of networkx objects with graph and node labels
-    """
-    G = nx.Graph()
-    delimiter = "\t" if "tsv" in edgelist_file else ","
-    print(delimiter)
-    df = pd.read_csv(
-        os.path.join(datadir, edgelist_file), delimiter=delimiter, header=None
-    )
-    data = list(map(tuple, df.values.tolist()))
-    G.add_edges_from(data)
-    print("Total nodes: ", G.number_of_nodes())
-
-    G = max(nx.connected_component_subgraphs(G), key=len)
-    print("Total nodes in largest connected component: ", G.number_of_nodes())
-
-    df = pd.read_csv(os.path.join(datadir, label_file), delimiter="\t", usecols=[0, 1])
-    data = list(map(tuple, df.values.tolist()))
-
-    missing_node = 0
-    for line in data:
-        if int(line[0]) not in G:
-            missing_node += 1
-        else:
-            G.nodes[int(line[0])]["label"] = int(line[1] == "Essential")
-
-    print("missing node: ", missing_node)
-
-    missing_label = 0
-    remove_nodes = []
-    for u in G.nodes():
-        if "label" not in G.nodes[u]:
-            missing_label += 1
-            remove_nodes.append(u)
-    G.remove_nodes_from(remove_nodes)
-    print("missing_label: ", missing_label)
-
-    if feat_file is None:
-        feature_generator = featgen.ConstFeatureGen(np.ones(10, dtype=float))
-        feature_generator.gen_node_features(G)
-    else:
-        df = pd.read_csv(os.path.join(datadir, feat_file), delimiter=",")
-        data = np.array(df.values)
-        print("Feat shape: ", data.shape)
-
-        for row in data:
-            if int(row[0]) in G:
-                if concat:
-                    node = int(row[0])
-                    onehot = np.zeros(10)
-                    onehot[min(G.degree[node], 10) - 1] = 1.0
-                    G.nodes[node]["feat"] = np.hstack(
-                        (np.log(row[1:] + 0.1), [1.0], onehot)
-                    )
-                else:
-                    G.nodes[int(row[0])]["feat"] = np.log(row[1:] + 0.1)
-
-        missing_feat = 0
-        remove_nodes = []
-        for u in G.nodes():
-            if "feat" not in G.nodes[u]:
-                missing_feat += 1
-                remove_nodes.append(u)
-        G.remove_nodes_from(remove_nodes)
-        print("missing feat: ", missing_feat)
-
-    return G
 
 
 def build_aromaticity_dataset():

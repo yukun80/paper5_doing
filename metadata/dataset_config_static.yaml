@@ -6,6 +6,11 @@ grid:
     su_id: "su_a10000_c01_10m.tif"
     inventory: "Sample_Yajiang_list_nodata.tif"
 
+sampling:
+  strategy: "random_balanced" # Options: "block_split", "random_balanced"
+  train_ratio: 0.7
+  pos_neg_ratio: 1.0
+
 factors:
   # --- Group 1: 静态孕灾环境 (Static Environment) ---
   # Role: static_env

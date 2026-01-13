@@ -22,7 +22,7 @@ python experiments/GNNExplainer/inference_gcn.py --mode %MODE%
 if %ERRORLEVEL% NEQ 0 (echo [ERROR] Failed in Inference && pause && exit /b %ERRORLEVEL%)
 
 echo 3. Explaining High-Risk Nodes...
-python experiments/GNNExplainer/explain_landslide.py --mode %MODE% --num-explain 50
+python experiments/GNNExplainer/explain_landslide.py --mode %MODE% --num-explain 10
 if %ERRORLEVEL% NEQ 0 (echo [ERROR] Failed in Explanation && pause && exit /b %ERRORLEVEL%)
 
 echo 4. Applying InSAR Correction...

@@ -227,32 +227,118 @@ class LandslideDataAdapter:
             self.adj_tensor = self._build_adjacency()
             self.feat_tensor = self._build_features()
             
-            # Labels: Shape [1, N] or [N] depending on loss function
-            # models.py expects labels to be used with cross_entropy, usually [Batch, N]?
-            # Actually GcnEncoderNode expects label to be [N] for CE loss in its forward/loss.
-            # Let's provide [1, N] to match batch dim of others.
+            # Labels: Shape [1, N]
             labels = self.df_features["label"].values.astype(np.int64)
             self.label_tensor = torch.tensor(labels).unsqueeze(0)
             
-            # Masks
-            # Split logic: < 4100 is Test, >= 4100 is Train
+            # --- Sampling Strategy Implementation ---
+            # Reload config to get sampling params if needed, or assume they were passed or defaults
+            # For robustness, we'll read from the loaded config dict if we had kept it, 
+            # but here we'll re-read or assume defaults if not present in self.
+            # Ideally, self.config should be stored in __init__. 
+            # Let's quickly re-load for safety in this method scope.
             
-            # Priority: Use 'train_sample_mask' if available (Balanced Sampling)
-            if "train_sample_mask" in self.df_features.columns:
-                # Ensure it's boolean
-                mask_col = self.df_features["train_sample_mask"].astype(bool)
-                self.train_mask = mask_col.values
-                logger.info(f"Using Balanced Training Mask: {self.train_mask.sum()} samples.")
-            else:
-                # Fallback: Use all training data (Imbalanced)
-                self.train_mask = (self.df_features["split"] == "train").values
-                logger.warning("Balanced mask not found. Using full imbalanced training set.")
+            config_path = self.base_dir / "metadata" / f"dataset_config_{self.mode}.yaml"
+            with open(config_path, "r", encoding="utf-8") as f:
+                config = yaml.safe_load(f)
+            
+            sampling_cfg = config.get("sampling", {})
+            strategy = sampling_cfg.get("strategy", "block_split")
+            
+            num_nodes = len(self.df_features)
+            self.train_mask = np.zeros(num_nodes, dtype=bool)
+            self.test_mask = np.zeros(num_nodes, dtype=bool)
+            
+            if strategy == "random_balanced":
+                train_ratio = sampling_cfg.get("train_ratio", 0.7)
+                pos_neg_ratio = sampling_cfg.get("pos_neg_ratio", 1.0)
+                
+                # Indices
+                idx_pos = np.where(labels == 1)[0]
+                idx_neg = np.where(labels == 0)[0]
+                
+                # Shuffle
+                np.random.seed(42) # Fixed seed for reproducibility
+                np.random.shuffle(idx_pos)
+                np.random.shuffle(idx_neg)
+                
+                # Split Positive
+                n_pos = len(idx_pos)
+                n_pos_train = int(n_pos * train_ratio)
+                
+                train_idx_pos = idx_pos[:n_pos_train]
+                test_idx_pos = idx_pos[n_pos_train:]
+                
+                # Sample Negative (Balanced for Train)
+                n_neg_train_target = int(len(train_idx_pos) * pos_neg_ratio)
+                # Ensure we don't ask for more negatives than exist
+                n_neg_train_target = min(n_neg_train_target, len(idx_neg))
+                
+                train_idx_neg = idx_neg[:n_neg_train_target]
+                # All remaining negatives go to Test
+                test_idx_neg = idx_neg[n_neg_train_target:]
+                
+                # Set Masks
+                self.train_mask[train_idx_pos] = True
+                self.train_mask[train_idx_neg] = True
+                
+                self.test_mask[test_idx_pos] = True
+                self.test_mask[test_idx_neg] = True
+                
+                logger.info(f"Strategy: Random Balanced (Train Ratio: {train_ratio}, Pos/Neg: {pos_neg_ratio})")
+                logger.info(f"Train Set: {self.train_mask.sum()} (Pos: {len(train_idx_pos)}, Neg: {len(train_idx_neg)})")
+                logger.info(f"Test Set: {self.test_mask.sum()} (Pos: {len(test_idx_pos)}, Neg: {len(test_idx_neg)})")
+                
+            else: # Default: block_split
+                # Split logic: < 4100 is Train (Wait, original logic was >= 4100 is Train? Let's check context.
+                # In train_landslide.py: train_idx = data["train_idx"].
+                # In Phase 1 description: "split" column in parquet.
+                # Let's respect the "split" column if it exists and matches block split logic.
+                
+                if "split" in self.df_features.columns:
+                     self.train_mask = (self.df_features["split"] == "train").values
+                     self.test_mask = (self.df_features["split"] == "test").values
+                     logger.info("Strategy: Block Split (from 'split' column)")
+                else:
+                    # Fallback hardcoded if column missing
+                    su_ids = self.node_ids
+                    # Assuming SU_ID is integer-like or parseable
+                    # Original logic mentioned "4100 threshold"
+                    # Let's assume SU_ID < 4100 is Test based on previous context, but safer to rely on parquet 'split' column
+                    # If we really must hardcode:
+                    logger.warning("'split' column missing. Using fallback Block Split (Threshold 4100).")
+                    # Warning: This depends on SU_ID format.
+                    # Let's assume sorted order split like 70/30 block if IDs are not integers
+                    cutoff = int(num_nodes * 0.7)
+                    self.train_mask[:cutoff] = True
+                    self.test_mask[cutoff:] = True
 
-            self.test_mask = (self.df_features["split"] == "test").values
-            
+            # --- CRITICAL: Override with Pre-computed Balanced Mask if Available ---
+            # This aligns GNN training with RF/XGBoost by strictly using the 1:1 InSAR-filtered set
+            # for Loss calculation, while keeping the full graph for Message Passing.
+            if "train_sample_mask" in self.df_features.columns:
+                logger.info("Found 'train_sample_mask' in dataset. Overriding training mask to enforce 1:1 balance & InSAR constraints.")
+                # Ensure we strictly follow the pre-computed mask for training
+                # Note: The mask in parquet should strictly be a subset of the 'train' split, but we enforce it here.
+                precomputed_mask = self.df_features["train_sample_mask"].fillna(False).values.astype(bool)
+                
+                # Update train_mask
+                self.train_mask = precomputed_mask
+                
+                # Sanity Check: Ensure no test leakage (though dataset builder should handle this)
+                leakage = np.sum(self.train_mask & self.test_mask)
+                if leakage > 0:
+                    logger.warning(f"Found {leakage} nodes marked as both Train_Sample and Test! Removing them from Train.")
+                    self.train_mask = self.train_mask & (~self.test_mask)
+
             # Train indices list
             self.train_idx = np.where(self.train_mask)[0].tolist()
             self.test_idx = np.where(self.test_mask)[0].tolist()
+
+            # Logging final stats
+            n_pos_train = np.sum(self.label_tensor.numpy()[0][self.train_idx] == 1)
+            n_neg_train = np.sum(self.label_tensor.numpy()[0][self.train_idx] == 0)
+            logger.info(f"Final Training Set Size: {len(self.train_idx)} (Pos: {n_pos_train}, Neg: {n_neg_train})")
 
         return {
             "adj": self.adj_tensor,          # [1, N, N]

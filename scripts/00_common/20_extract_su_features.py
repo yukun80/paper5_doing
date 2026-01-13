@@ -174,15 +174,6 @@ def main():
                     results_df[f"{b_name}_mean"] = scipy.ndimage.mean(
                         data, labels=effective_labels, index=all_su_ids
                     ).astype(np.float32)
-                    results_df[f"{b_name}_std"] = scipy.ndimage.standard_deviation(
-                        data, labels=effective_labels, index=all_su_ids
-                    ).astype(np.float32)
-                    results_df[f"{b_name}_min"] = scipy.ndimage.minimum(
-                        data, labels=effective_labels, index=all_su_ids
-                    ).astype(np.float32)
-                    results_df[f"{b_name}_max"] = scipy.ndimage.maximum(
-                        data, labels=effective_labels, index=all_su_ids
-                    ).astype(np.float32)
 
             elif b_type == "categorical":
                 valid_indices = effective_labels > 0

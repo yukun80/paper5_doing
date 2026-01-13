@@ -1,13 +1,13 @@
-2026-01-12 20:25:31,833 [INFO] >>> Starting Program 4: Graph Construction (Topology)
-2026-01-12 20:25:31,843 [INFO] Resolved Output Directory: E:\Document\paper_library\5th_paper_InSAR\datasets\05_graph_SU\su_a10000_c01
-2026-01-12 20:25:31,843 [INFO] Loading SU Grid: su_a10000_c01.tif
-2026-01-12 20:25:32,544 [INFO] Scanning for spatial neighbors (Vectorized)...
-2026-01-12 20:25:37,998 [INFO] Detected 149002 unique adjacency boundaries.
-2026-01-12 20:25:42,798 [INFO] ----------------------------------------
-2026-01-12 20:25:42,798 [INFO] Graph Statistics (dynamic):
-2026-01-12 20:25:42,799 [INFO]   Total Nodes (SUs): 32453
-2026-01-12 20:25:42,799 [INFO]   Total Edges      : 186132
-2026-01-12 20:25:42,799 [INFO]   Average Degree   : 5.74
-2026-01-12 20:25:42,799 [INFO] ----------------------------------------
-2026-01-12 20:25:42,906 [INFO] Saved graph edges to: E:\Document\paper_library\5th_paper_InSAR\datasets\05_graph_SU\su_a10000_c01\edges_dynamic.parquet
-2026-01-12 20:25:42,906 [INFO] Total Time: 11.07 seconds
+2026-01-13 16:50:41,831 [INFO] >>> Starting Program 4: Graph Construction (Topology)
+2026-01-13 16:50:41,841 [INFO] Resolved Output Directory: E:\Document\paper_library\5th_paper_InSAR\datasets\05_graph_SU\su_a500000_c06
+2026-01-13 16:50:41,841 [INFO] Loading SU Grid: su_a500000_c06.tif
+2026-01-13 16:50:42,397 [INFO] Scanning for spatial neighbors (Vectorized)...
+2026-01-13 16:50:45,746 [INFO] Detected 43865 unique adjacency boundaries.
+2026-01-13 16:50:48,957 [INFO] ----------------------------------------
+2026-01-13 16:50:48,957 [INFO] Graph Statistics (dynamic):
+2026-01-13 16:50:48,957 [INFO]   Total Nodes (SUs): 8888
+2026-01-13 16:50:48,957 [INFO]   Total Edges      : 51942
+2026-01-13 16:50:48,957 [INFO]   Average Degree   : 5.84
+2026-01-13 16:50:48,958 [INFO] ----------------------------------------
+2026-01-13 16:50:48,995 [INFO] Saved graph edges to: E:\Document\paper_library\5th_paper_InSAR\datasets\05_graph_SU\su_a500000_c06\edges_dynamic.parquet
+2026-01-13 16:50:48,996 [INFO] Total Time: 7.16 seconds

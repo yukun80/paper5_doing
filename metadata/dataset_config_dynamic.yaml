@@ -3,8 +3,13 @@ grid:
   resolution: 10
   nodata: -9999
   files:
-    su_id: "su_a10000_c01.tif"
+    su_id: "su_a500000_c06.tif"
     inventory: "Sample_Yajiang_list_nodata.tif"
+
+sampling:
+  strategy: "block_split" # Options: "block_split", "random_balanced"
+  train_ratio: 0.7
+  pos_neg_ratio: 1.0
 
 factors:
   # --- Group 1: 静态孕灾环境 (Static Environment) ---

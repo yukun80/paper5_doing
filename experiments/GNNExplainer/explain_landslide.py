@@ -14,7 +14,7 @@ Description:
     -   Dynamic Sensitivity Index (DSI) calculation.
     -   Zoning Classification (Static-Dominant vs Dynamic-Triggered).
 
-python experiments/GNNExplainer/explain_landslide.py --mode dynamic --num-explain 50
+python experiments/GNNExplainer/explain_landslide.py --mode dynamic --num-explain 10
 """
 
 import sys
@@ -362,8 +362,8 @@ if __name__ == "__main__":
     parser.add_argument("--mode", type=str, default="dynamic")
     parser.add_argument("--explain-all", action="store_true")
     parser.add_argument("--num-explain", type=int, default=50) # Increased default
-    parser.add_argument("--num-epochs", type=int, default=100)
-    parser.add_argument("--num-runs", type=int, default=5)
+    parser.add_argument("--num-epochs", type=int, default=50)
+    parser.add_argument("--num-runs", type=int, default=1)
     parser.add_argument("--lr", type=float, default=0.01)
     
     # Model Args

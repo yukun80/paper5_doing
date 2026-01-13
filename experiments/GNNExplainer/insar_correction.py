@@ -48,7 +48,7 @@ BASE_OUTPUT_DIR = Path(__file__).resolve().parent / "final_maps"
 
 # InSAR Configuration
 INSAR_FILE_PATTERN = "InSAR_desc_2024_2025*nodata.tif"
-DEFORMATION_THRESHOLD_MM = 10.0 # mm/year (Absolute value)
+DEFORMATION_THRESHOLD_M = 0.01 # m/year (Absolute value, equivalent to 10mm/yr)
 
 # Resolved dynamically
 INFERENCE_DIR = None
@@ -148,9 +148,9 @@ def main(args):
     insar_mask_valid = insar_grid != insar_nodata
     
     high_deform_mask = np.zeros_like(insar_grid, dtype=bool)
-    high_deform_mask[insar_mask_valid] = np.abs(insar_grid[insar_mask_valid]) > DEFORMATION_THRESHOLD_MM
+    high_deform_mask[insar_mask_valid] = np.abs(insar_grid[insar_mask_valid]) > DEFORMATION_THRESHOLD_M
     
-    logger.info(f"Identified {np.sum(high_deform_mask)} pixels with high deformation (> {DEFORMATION_THRESHOLD_MM}mm/yr).")
+    logger.info(f"Identified {np.sum(high_deform_mask)} pixels with high deformation (> {DEFORMATION_THRESHOLD_M} m/yr).")
     
     # Final Map
     final_map = gcn_map.copy()
