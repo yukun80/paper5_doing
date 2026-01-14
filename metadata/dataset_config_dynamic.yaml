@@ -99,21 +99,21 @@ factors:
     role: "static_env"
     required: false
 
-  - name: "NBR_Pre"
+  - name: "NBR"
     filename: "S2_NBR_2025_Pre_10m_nodata.tif"
     type: "continuous"
     group: "vegetation"
     role: "static_env"
     required: true
 
-  - name: "NDVI_Pre"
+  - name: "NDVI"
     filename: "S2_NDVI_20220401_20220930_10m_nodata.tif"
     type: "continuous"
     group: "vegetation"
     role: "static_env"
     required: true
 
-  - name: "NDWI_Pre"
+  - name: "NDWI"
     filename: "S2_NDWI_20230415_20230930_10m_nodata.tif"
     type: "continuous"
     group: "water"
