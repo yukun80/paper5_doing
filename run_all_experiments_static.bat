@@ -87,14 +87,6 @@ echo 2. Running Full Inference...
 python experiments/GNNExplainer/inference_gcn.py --mode static
 if %ERRORLEVEL% NEQ 0 (echo [ERROR] Failed in Inference && exit /b %ERRORLEVEL%)
 
-echo 3. Explaining High-Risk Nodes...
-python experiments/GNNExplainer/explain_landslide.py --mode static --num-explain 50
-if %ERRORLEVEL% NEQ 0 (echo [ERROR] Failed in Explanation && exit /b %ERRORLEVEL%)
-
-echo 4. Applying InSAR Correction...
-python experiments/GNNExplainer/insar_correction.py --mode static
-if %ERRORLEVEL% NEQ 0 (echo [ERROR] Failed in Correction && exit /b %ERRORLEVEL%)
-
 echo.
 echo ============================================================
 echo [SUCCESS] All Phases Completed Successfully!

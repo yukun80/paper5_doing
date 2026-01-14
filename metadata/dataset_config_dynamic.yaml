@@ -3,7 +3,7 @@ grid:
   resolution: 10
   nodata: -9999
   files:
-    su_id: "su_a500000_c06.tif"
+    su_id: "su_a10000_c01.tif"
     inventory: "Sample_Yajiang_list_nodata.tif"
 
 sampling:
