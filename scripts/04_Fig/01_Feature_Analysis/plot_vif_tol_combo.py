@@ -116,7 +116,7 @@ def plot_experiment(exp_meta):
     line = ax2.plot(
         vif_df["TOL"],
         y_pos,
-        color="#34495e",
+        color="darkblue",
         linestyle="--",
         marker="o",
         linewidth=1.5,
@@ -125,15 +125,16 @@ def plot_experiment(exp_meta):
         alpha=0.9,
     )
 
-    ax2.set_xlabel("Tolerance (TOL)", fontweight="bold", color="#34495e", fontsize=14)
-    ax2.tick_params(axis="x", labelcolor="#34495e", labelsize=14)
-    ax2.set_xlim(-0.4, 1.6)
+    ax2.set_xlabel("Tolerance (TOL)", fontweight="bold", color="darkblue", fontsize=14)
+    ax2.tick_params(axis="x", colors="darkblue", labelcolor="darkblue", labelsize=14)
+    ax2.spines['top'].set_color('darkblue')
+    ax2.set_xlim(0, 1.42857)  # Starts from 0, keeps 1.0 at 70% width (1.0/0.7)
     # Manually set ticks to ensure we only show 0 to 1.0
     ax2.set_xticks([0, 0.2, 0.4, 0.6, 0.8, 1.0])
 
-    # Add Threshold Lines (5, 10)
-    for thresh in [5, 10]:
-        ax1.axvline(thresh, color="#95a5a6", linestyle=":", linewidth=1.0, alpha=0.5)
+    # Remove any background grids
+    ax1.grid(False)
+    ax2.grid(False)
 
     # --- Simplified Legend ---
     from matplotlib.patches import Patch
@@ -142,7 +143,7 @@ def plot_experiment(exp_meta):
         Patch(facecolor="#1a9850", label="VIF < 5 (Ideal)"),
         Patch(facecolor="#fee08b", label="VIF 5-10"),
         Patch(facecolor="#d73027", label="VIF $\geq$ 10"),
-        plt.Line2D([0], [0], color="#34495e", linestyle="--", marker="o", label="TOL"),
+        plt.Line2D([0], [0], color="darkblue", linestyle="--", marker="o", label="TOL"),
     ]
     ax1.legend(handles=legend_elements, loc="lower right", frameon=True, fontsize=16)
 

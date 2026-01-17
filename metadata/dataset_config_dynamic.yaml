@@ -43,6 +43,13 @@ factors:
     role: "static_env"
     required: true
 
+  - name: "TRI"
+    filename: "Yajiang_TRI_clip_10m_nodata.tif"
+    type: "continuous"
+    group: "terrain"
+    role: "static_env"
+    required: false
+
   - name: "TWI"
     filename: "Yajiang_TWI_clip_10m_nodata.tif"
     type: "continuous"
@@ -76,35 +83,35 @@ factors:
     type: "continuous"
     group: "hydrology"
     role: "static_env"
-    required: false
+    required: true
 
   - name: "Dis2Road"
     filename: "dis2road_clip_10m_nodata.tif"
     type: "continuous"
     group: "anthropogenic"
     role: "static_env"
-    required: false
+    required: true
 
   - name: "Dis2Fault"
-    filename: "dis2fault_clip_10m_nodata.tif"
+    filename: "dis2fault_10m_clip_nodata.tif"
     type: "continuous"
     group: "geology"
     role: "static_env"
-    required: false
+    required: true
 
   - name: "Precipitation"
     filename: "Mean_Precip_2000_2024_10m_clip_10m_nodata.tif"
     type: "continuous"
     group: "climate"
     role: "static_env"
-    required: false
+    required: true
 
   - name: "NBR"
     filename: "S2_NBR_2025_Pre_10m_nodata.tif"
     type: "continuous"
     group: "vegetation"
     role: "static_env"
-    required: true
+    required: false
 
   - name: "NDVI"
     filename: "S2_NDVI_20220401_20220930_10m_nodata.tif"
@@ -124,21 +131,21 @@ factors:
   # Role: dynamic_forcing
 
   - name: "dNDVI"
-    filename: "S2_dNDVI_Float_20241230_nodata.tif"
+    filename: "S2_dNDVI_2024_post_nodata.tif"
     type: "continuous"
     group: "disturbance"
     role: "dynamic_forcing"
     required: true
 
   - name: "dNBR"
-    filename: "S2_dNBR_Float_20241230_nodata.tif"
+    filename: "S2_dNBR_2024_post_nodata.tif"
     type: "continuous"
     group: "disturbance"
     role: "dynamic_forcing"
-    required: true
+    required: false
 
   - name: "dMNDWI"
-    filename: "S2_dMNDWI_Float_20241230_nodata.tif"
+    filename: "S2_dMNDWI_2024_post_nodata.tif"
     type: "continuous"
     group: "disturbance"
     role: "dynamic_forcing"

@@ -587,11 +587,9 @@ if __name__ == "__main__":
     # ========================================================================
     # 单文件处理示例
     # ========================================================================
-    input_file = (
-        r"E:\Document\paper_library\5th_paper_InSAR\datasets\01_raw\Yajiang_tif_10m\Yajiang_aspect_clip_10m.tif"
-    )
+    input_file = r"E:\Document\paper_library\5th_paper_InSAR\datasets\01_raw\Yajiang_tif\meta\S2_dNDVI_Float_20241230_ROI_dNDVI.tif"
     output_file = (
-        r"E:\Document\paper_library\5th_paper_InSAR\datasets\02_aligned_grid\Yajiang_aspect_clip_10m_nodata.tif"
+        r"E:\Document\paper_library\5th_paper_InSAR\datasets\02_aligned_grid_pre+post\S2_dNDVI_2024_post_nodata.tif"
     )
 
     # 使用均值填充（按波段独立计算均值）
